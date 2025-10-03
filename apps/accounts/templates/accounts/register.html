@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% load static %}
-{% load accounts_extras %} {# Load the custom template filter #}
+{% load core_extras %} {# Load the correct template filter #}
 
 {% block title %}Registro{% endblock %}
 
 {% block content %}
-<div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
-    <h2 class="text-2xl font-bold text-center text-dark mb-6">Registrarse</h2>
+<div class="max-w-md mx-auto bg-white dark:bg-slate-800 p-8 rounded-lg shadow-md mt-10">
+    <h2 class="text-2xl font-bold text-center text-dark dark:text-white mb-6">Registrarse</h2>
     <form method="post">
         {% csrf_token %}
         {% for field in form %}
             <div class="mb-4">
-                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
-                {{ field|add_class:"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm bg-white text-gray-900" }}
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ field.label }}</label>
+                {{ field|add_class:"mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" }}
                 {% if field.help_text %}
-                    <p class="mt-1 text-sm text-gray-500">{{ field.help_text }}</p>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ field.help_text }}</p>
                 {% endif %}
                 {% for error in field.errors %}
                     <p class="mt-1 text-sm text-red-600">{{ error }}</p>
@@ -26,7 +26,7 @@
         </button>
     </form>
     <div class="mt-6 text-center">
-        <p class="text-sm text-gray-600">¿Ya tienes una cuenta? <a href="{% url 'login' %}" class="font-medium text-primary hover:text-dark">Iniciar Sesión</a></p>
+        <p class="text-sm text-gray-600 dark:text-gray-400">¿Ya tienes una cuenta? <a href="{% url 'login' %}" class="font-medium text-primary hover:text-dark">Iniciar Sesión</a></p>
     </div>
 </div>
 {% endblock %}

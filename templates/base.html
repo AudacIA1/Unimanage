@@ -5,9 +5,50 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Sistema de Gestión de Activos{% endblock %}</title>
+
+    <!-- Theme init: aplicar antes de estilos -->
+    <script>
+      try {
+        const userPref = localStorage.getItem('theme'); // 'dark' | 'light' | null
+        const systemPrefDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        function applyTheme(theme) {
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        }
+
+        // Si el usuario ya eligió, usar eso; si no, usar la preferencia del sistema:
+        if (userPref === 'dark' || (userPref === null && systemPrefDark)) {
+          applyTheme('dark');
+        } else {
+          applyTheme('light');
+        }
+
+        // Escuchar cambios en la preferencia del sistema (solo si usuario no forzó)
+        if (window.matchMedia) {
+          const mq = window.matchMedia('(prefers-color-scheme: dark)');
+          const listener = (e) => {
+            if (!localStorage.getItem('theme')) {
+              applyTheme(e.matches ? 'dark' : 'light');
+            }
+          };
+          // compatibilidad: addEventListener o addListener
+          if (mq.addEventListener) mq.addEventListener('change', listener);
+          else if (mq.addListener) mq.addListener(listener);
+        }
+      } catch (err) {
+        console.error('Theme init error', err);
+      }
+    </script>
+
+    <!-- Tailwind config + CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
+        darkMode: 'class',
         theme: {
           extend: {
             colors: {
@@ -22,73 +63,140 @@
         }
       }
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> {# Link to custom stylesheet #}
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#10B981',
+              secondary: '#6EE7B7',
+              accent: '#FBBF24',
+              dark: '#047857',
+              status_blue: '#3B82F6',
+              status_yellow: '#F59E0B',
+            }
+          }
+        }
+      }
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    {% block extra_head %}{% endblock %} {# New block for extra head content #}
+    {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-gray-50 text-gray-900 flex min-h-screen">
+<body class="min-h-screen bg-gray-50 text-slate-900 transition-colors duration-200 dark:bg-slate-900 dark:text-slate-100 flex">
 
     <!-- Sidebar -->
-    <aside class="w-64 text-white shadow-lg flex flex-col" style="background-color: #10B981;">
-        <div class="p-6 text-center border-b border-secondary">
+    <aside class="w-64 text-white shadow-lg flex flex-col bg-primary dark:bg-slate-800">
+        <div class="p-6 text-center border-b border-secondary dark:border-slate-700">
             <a href="{% url 'dashboard' %}" class="text-2xl font-bold flex items-center justify-center space-x-2 text-white">
-                <i class="fas fa-chart-line"></i>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                </svg>
                 <span>UniManage</span>
             </a>
         </div>
         <nav class="flex-grow p-4">
             <ul class="space-y-2">
                 <li>
-                    <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary hover:border-l-4 hover:border-primary transition-all duration-200">
-                        <i class="fas fa-home"></i><span>Inicio</span>
+                    <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125h9.75a1.125 1.125 0 001.125-1.125V9.75M8.25 21h7.5" />
+                        </svg>
+                        <span>Inicio</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'asset_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary hover:border-l-4 hover:border-primary transition-all duration-200">
-                        <i class="fas fa-list"></i><span>Activos</span>
+                    <a href="{% url 'asset_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                        </svg>
+                        <span>Activos</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'loan_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary hover:border-l-4 hover:border-primary transition-all duration-200">
-                        <i class="fas fa-exchange-alt"></i><span>Préstamos</span>
+                    <a href="{% url 'loan_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Préstamos</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'maintenance_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary hover:border-l-4 hover:border-primary transition-all duration-200">
-                        <i class="fas fa-tools"></i><span>Mantenimientos</span>
+                    <a href="{% url 'maintenance_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.25 2.25 0 0021 17.25l-5.83-5.83M11.42 15.17L5.25 7.25 2.25 4.25 4.25 2.25 7.25 5.25 15.17 11.42z" />
+                        </svg>
+                        <span>Mantenimientos</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'report_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary hover:border-l-4 hover:border-primary transition-all duration-200">
-                        <i class="fas fa-chart-pie"></i><span>Reportes</span>
+                    <a href="{% url 'report_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+                        </svg>
+                        <span>Reportes</span>
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'user_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary hover:border-l-4 hover:border-primary transition-all duration-200">
-                        <i class="fas fa-users-cog"></i><span>Usuarios</span>
+                    <a href="{% url 'user_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372m-10.5-.372a9.337 9.337 0 01-3.428-.372M15 19.128v-1.5a3.375 3.375 0 00-3.375-3.375H9.375a3.375 3.375 0 00-3.375 3.375v1.5m2.125-9.375c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125H9.375c-.621 0-1.125-.504-1.125-1.125v-1.5c0-.621.504-1.125 1.125-1.125h3.75z" />
+                        </svg>
+                        <span>Usuarios</span>
                     </a>
                 </li>
             </ul>
         </nav>
-        <div class="mt-auto p-4 border-t border-secondary"> {# Added mt-auto to push auth links to bottom #}
+        <div class="mt-auto p-4 border-t border-secondary dark:border-slate-700">
+            <div class="flex justify-between items-center mb-2">
+                {% if user.is_authenticated %}
+                    <p class="text-sm text-white">Hola, {{ user.username }}!</p>
+                {% else %}
+                    <div></div> {# Empty div to push the button to the right #}
+                {% endif %}
+                <button id="theme-toggle" aria-label="Cambiar tema" class="p-2 rounded bg-gray-200 dark:bg-gray-700 text-slate-900 dark:text-slate-100">
+                    <span id="icon-light" class="hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                        </svg>
+                    </span>
+                    <span id="icon-dark">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                        </svg>
+                    </span>
+                </button>
+            </div>
+
             {% if user.is_authenticated %}
-                <p class="text-sm text-white mb-2">Hola, {{ user.username }}!</p>
-                <form action="{% url 'logout' %}" method="post" class="inline"> {# Added form for POST logout #}
+                <form action="{% url 'logout' %}" method="post" class="inline">
                     {% csrf_token %}
-                    <button type="submit" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary hover:border-l-4 hover:border-primary transition-all duration-200 w-full text-left"> {# Changed a to button #}
-                        <i class="fas fa-sign-out-alt"></i><span>Cerrar Sesión</span>
+                    <button type="submit" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200 w-full text-left">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                        </svg>
+                        <span>Cerrar Sesión</span>
                     </button>
                 </form>
             {% else %}
-                <a href="{% url 'login' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary hover:border-l-4 hover:border-primary transition-all duration-200 mb-2">
-                    <i class="fas fa-sign-in-alt"></i><span>Iniciar Sesión</span>
+                <a href="{% url 'login' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                    </svg>
+                    <span>Iniciar Sesión</span>
                 </a>
-                <a href="{% url 'register' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary hover:border-l-4 hover:border-primary transition-all duration-200">
-                    <i class="fas fa-user-plus"></i><span>Registrarse</span>
+                <a href="{% url 'register' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.5 21.75c-2.673 0-5.18-.992-7.004-2.617z" />
+                    </svg>
+                    <span>Registrarse</span>
                 </a>
             {% endif %}
         </div>
-        <div class="p-4 text-center text-sm text-white border-t border-secondary">
+        <div class="p-4 text-center text-sm text-white border-t border-secondary dark:border-slate-700">
             Sistema de Gestión de Activos © 2025
         </div>
     </aside>
@@ -96,8 +204,7 @@
     <!-- Main Content Area -->
     <div class="flex-grow flex flex-col">
         <main class="flex-grow container mx-auto px-4 py-6">
-            {% block content %}
-            {% endblock %}
+            {% block content %}{% endblock %}
         </main>
     </div>
 
@@ -107,5 +214,33 @@
     <script src="{% static 'js/chatbot.js' %}"></script>
     {% endblock %}
 
+    <!-- Toggle script (al final del body) -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggle = document.getElementById('theme-toggle');
+      const iconLight = document.getElementById('icon-light');
+      const iconDark  = document.getElementById('icon-dark');
+
+      function updateIcons() {
+        const isDark = document.documentElement.classList.contains('dark');
+        if (isDark) {
+          iconDark.classList.add('hidden');
+          iconLight.classList.remove('hidden');
+        } else {
+          iconDark.classList.remove('hidden');
+          iconLight.classList.add('hidden');
+        }
+      }
+
+      toggle.addEventListener('click', () => {
+        const isDarkNow = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', isDarkNow ? 'dark' : 'light'); // persiste elección
+        updateIcons();
+      });
+
+      // Inicializar iconos según tema actual
+      updateIcons();
+    });
+    </script>
 </body>
 </html>
