@@ -16,3 +16,5 @@ es-core-news-md @ https://github.com/explosion/spacy-models/releases/download/es
 asgiref==3.9.2
 sqlparse==0.5.3
 tzdata==2025.2
+django-mptt==0.16.0
+django-autocomplete-light==3.12.1

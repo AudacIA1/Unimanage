@@ -1,0 +1,17 @@
+{% load core_extras %}
+
+<form method="post" action="{% url 'asset_category_create_popup' %}">
+    {% csrf_token %}
+    {% for field in form %}
+        <div class="mb-4"> 
+            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+            {{ field|add_class:"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" }}
+            {% if field.help_text %}
+                <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+            {% endif %}
+            {% for error in field.errors %}
+                <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</form>

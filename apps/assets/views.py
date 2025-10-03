@@ -3,6 +3,10 @@ from django.contrib.auth.decorators import login_required
 from .models import AssetCategory, Asset
 from .forms import AssetForm
 from django.db.models import Q
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .forms import AssetCategoryForm # We will create this form
+from django.template.loader import render_to_string
 
 @login_required
 def asset_list(request):
@@ -103,3 +107,17 @@ def asset_delete(request, pk):
         asset.delete()
         return redirect("asset_list")
     return render(request, "assets/asset_confirm_delete.html", {"asset": asset})
+
+def asset_category_create_popup(request):
+    if request.method == "POST":
+        form = AssetCategoryForm(request.POST)
+        if form.is_valid():
+            category = form.save()
+            return JsonResponse({'id': category.id, 'text': category.name})
+        else:
+            # If form is not valid, render the form with errors and return as JSON
+            return JsonResponse({'error': form.errors.get_json_data(), 'form_html': render_to_string('assets/category_form_inner.html', {'form': form}, request=request)}, status=400)
+    else:
+        form = AssetCategoryForm()
+    # For GET requests, render only the form fields for AJAX loading into modal
+    return render(request, 'assets/category_form_inner.html', {'form': form})

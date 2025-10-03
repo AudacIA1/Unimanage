@@ -67,13 +67,16 @@ def dashboard(request):
     last_10_loans = Loan.objects.select_related('asset', 'user').order_by('-loan_date')[:10]
     last_10_maintenances = Maintenance.objects.select_related('asset').order_by('-created_at')[:10]
 
-    # --- 4. Datos para Gráfico Circular ---
+    # --- 4. Datos para Gráficos ---
     # Se preparan los datos para el gráfico de distribución de estados de activos.
     asset_status_labels = ["Disponible", "En uso", "En mantenimiento"]
     asset_status_data = [available_assets, in_use_assets, maintenance_assets]
 
+    # Se preparan los datos para el gráfico de activos por categoría.
+    asset_category_labels = [c['categoria'] for c in data_by_category]
+    asset_category_data = [c['total'] for c in data_by_category]
+
     # --- 5. Contexto para la Plantilla ---
-    print("DEBUG: data_by_category:", data_by_category)
     context = {
         "data_by_category": data_by_category,
         "total_assets": total_assets,
@@ -85,6 +88,8 @@ def dashboard(request):
         "last_10_maintenances": last_10_maintenances,
         "asset_status_labels": asset_status_labels,
         "asset_status_data": asset_status_data,
+        "asset_category_labels": asset_category_labels,
+        "asset_category_data": asset_category_data,
     }
 
     return render(request, "dashboard.html", context)

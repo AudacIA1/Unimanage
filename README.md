@@ -76,7 +76,9 @@ El proyecto se conecta a una base de datos MySQL. La configuración se gestiona 
 
 1.  **Crea una base de datos** en tu servidor MySQL. Puedes hacerlo con el siguiente comando SQL:
     ```sql
-    CREATE DATABASE unimanage_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    CREATE DATABASE unimanage_db 
+    CHARACTER SET utf8mb4 
+    COLLATE utf8mb4_unicode_ci;
     ```
 2.  En la raíz del proyecto, crea un archivo llamado `.env`.
 3.  Añade las credenciales de tu base de datos al archivo `.env`. Asegúrate de que coincidan con tu configuración de MySQL (puedes necesitar un usuario y contraseña específicos con permisos para la nueva base de datos):

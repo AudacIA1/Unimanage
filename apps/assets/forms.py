@@ -1,5 +1,7 @@
 from django import forms
-from .models import Asset
+from .models import Asset, AssetCategory
+from mptt.forms import TreeNodeChoiceField
+from dal import autocomplete # Import autocomplete
 
 class AssetForm(forms.ModelForm):
     """
@@ -8,12 +10,22 @@ class AssetForm(forms.ModelForm):
     Utiliza el modelo `Asset` y personaliza los widgets para que
     tengan una clase CSS estándar para el estilo.
     """
+    category = forms.ModelChoiceField(
+        queryset=AssetCategory.objects.all(),
+        widget=autocomplete.ModelSelect2(url='category-autocomplete',
+                                         attrs={'data-placeholder': 'Search for a category',
+                                                'data-minimum-input-length': 2})
+    )
+
     class Meta:
         model = Asset
         fields = ["name", "category", "location", "status"]
-        widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control"}),
-            "category": forms.Select(attrs={"class": "form-control"}),
-            "location": forms.TextInput(attrs={"class": "form-control"}),
-            "status": forms.Select(attrs={"class": "form-control"}),
-        }
+
+class AssetCategoryForm(forms.ModelForm):
+    parent = TreeNodeChoiceField(queryset=AssetCategory.objects.all(),
+                                 level_indicator='---',
+                                 required=False, # Parent can be null
+                                 )
+    class Meta:
+        model = AssetCategory
+        fields = ['name', 'parent']

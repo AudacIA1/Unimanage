@@ -40,21 +40,17 @@
             </div>
         </div>
 
-        <!-- Botón hacia el CRUD de Activos -->
-        <div class="text-center mb-8">
-            <a href="{% url 'asset_list' %}"
-               class="bg-primary hover:bg-dark text-white px-6 py-3 rounded-lg shadow-lg font-semibold">
-               Gestionar Activos
-            </a>
-        </div>
 
         <!-- Charts Section -->
-        <div class="flex justify-center mb-8"> {# Changed to flex justify-center to center the single chart #}
-            <div class="bg-white rounded-xl shadow-md p-5 w-full max-w-md"> {# Added w-full max-w-md to reduce size #}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white rounded-xl shadow-md p-5">
                 <h2 class="text-xl font-semibold text-dark mb-4">Distribución de Activos por Estado</h2>
                 <canvas id="assetStatusChart"></canvas>
             </div>
-            {# Removed the Assets by Category Bar Chart div #}
+            <div class="bg-white rounded-xl shadow-md p-5">
+                <h2 class="text-xl font-semibold text-dark mb-4">Activos por Categoría</h2>
+                <canvas id="assetCategoryChart"></canvas>
+            </div>
         </div>
 
         <!-- Distribución por Categorías -->
@@ -69,9 +65,9 @@
                         <h3 class="text-lg font-bold mb-2">{{ item.categoria }}</h3>
                         <p class="text-sm text-gray-700">Total: {{ item.total }}</p>
                         <div class="w-full bg-gray-300 rounded-full h-4 mt-3 flex">
-                            <div class="bg-primary h-4 rounded-l-full" style="width: {{ item.disponibles_pct }}%"></div>
-                            <div class="bg-status_blue h-4" style="width: {{ item.en_uso_pct }}%"></div>
-                            <div class="bg-status_yellow h-4 rounded-r-full" style="width: {{ item.mantenimiento_pct }}%"></div>
+                            <div class="h-4 rounded-l-full" style="width: {{ item.disponibles_pct }}%; background-color: #10B981;"></div>
+                            <div class="h-4" style="width: {{ item.en_uso_pct }}%; background-color: #3B82F6;"></div>
+                            <div class="h-4 rounded-r-full" style="width: {{ item.mantenimiento_pct }}%; background-color: #F59E0B;"></div>
                         </div>
                         <div class="mt-3 text-sm">
                             <span class="text-primary font-semibold">{{ item.disponibles }} disponibles</span> |
@@ -95,7 +91,7 @@
                 </div>
                 <div class="p-5">
                     {% if last_10_loans %}
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table id="loansTable" class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activo</th>
@@ -126,7 +122,7 @@
                 </div>
                 <div class="p-5">
                     {% if last_10_maintenances %}
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table id="maintenancesTable" class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activo</th>
@@ -153,11 +149,16 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_scripts %}
+{{ block.super }}
 <script>
-    // Asset Status Chart (Pie Chart)
+document.addEventListener('DOMContentLoaded', function() {
+    // Asset Status Chart (Doughnut Chart)
     const assetStatusCtx = document.getElementById('assetStatusChart').getContext('2d');
     new Chart(assetStatusCtx, {
-        type: 'pie',
+        type: 'doughnut',
         data: {
             labels: {{ asset_status_labels|safe }},
             datasets: [{
@@ -172,18 +173,50 @@
         },
         options: {
             responsive: true,
+            aspectRatio: 2, // Hace el gráfico más ancho que alto
             plugins: {
                 legend: {
                     position: 'top',
                 },
                 title: {
                     display: false,
-                    text: 'Distribución de Activos por Estado'
                 }
             }
         }
     });
 
-    // Removed Assets by Category Chart (Bar Chart) JavaScript code
+    // Assets by Category Chart (Bar Chart)
+    const assetCategoryCtx = document.getElementById('assetCategoryChart').getContext('2d');
+    new Chart(assetCategoryCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ asset_category_labels|safe }},
+            datasets: [{
+                label: 'Número de Activos',
+                data: {{ asset_category_data|safe }},
+                backgroundColor: '#10B981',
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false,
+                },
+                title: {
+                    display: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+});
 </script>
 {% endblock %}

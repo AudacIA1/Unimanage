@@ -1,0 +1,16 @@
+{
+  "name": "unimanage",
+  "version": "1.0.0",
+  "description": "UniManage es una aplicación web diseñada para la gestión integral de activos dentro de un entorno universitario. Permite llevar un control detallado del inventario, gestionar préstamos de equipos a usuarios y programar mantenimientos, todo a través de una interfaz web intuitiva.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "C:\\Users\\RYZEN\\UniManage\\node_modules\\.bin\\tailwindcss -i ./static/css/styles.css -o ./static/css/output.css"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^4.1.14"
+  }
+}

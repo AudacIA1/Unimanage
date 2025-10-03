@@ -1,15 +1,144 @@
 {% extends "base.html" %}
+{% load core_extras %}
+
 {% block title %}{{ title }}{% endblock %}
+
+{% block extra_head %}
+    {{ form.media }}
+{% endblock %}
+
 {% block content %}
 <div class="max-w-lg mx-auto bg-white p-6 rounded shadow">
     <h2 class="text-2xl font-bold mb-4">{{ title }}</h2>
-    <form method="post">
+    <form method="post" id="asset-form">
         {% csrf_token %}
-        {{ form.as_p }}
-        <div class="mt-4 flex space-x-2">
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Guardar</button>
-            <a href="{% url 'asset_list' %}" class="bg-gray-400 text-white px-4 py-2 rounded">Cancelar</a>
+        {% for field in form %}
+            {% if field.name == 'category' %}
+                <div class="mb-4">
+                    {{ field.label_tag }}
+                    <div class="flex items-center">
+                        {{ field|add_class:"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" }}
+                        <button type="button" class="ml-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600" id="openCategoryModal">
+                            + Nueva Categoría
+                        </button>
+                    </div>
+                    {% if field.help_text %}
+                        <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="mb-4">
+                    {{ field.label_tag }}
+                    {{ field|add_class:"mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm" }}
+                    {% if field.help_text %}
+                        <p class="text-sm text-gray-500 mt-1">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <p class="text-red-500 text-sm mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
+        <div class="flex justify-end space-x-2 mt-4">
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Guardar</button>
+            <a href="{% url 'asset_list' %}" class="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 no-underline">Cancelar</a>
         </div>
     </form>
 </div>
+
+<!-- Tailwind CSS Modal Structure -->
+<div id="categoryModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center pb-3">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Crear Nueva Categoría</h3>
+            <button class="text-gray-400 hover:text-gray-500" id="closeCategoryModal">
+                <span class="sr-only">Cerrar</span>
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="mt-2 px-7 py-3 modal-body-content">
+            <!-- Category form will be loaded here via AJAX -->
+        </div>
+        <div class="items-center px-4 py-3">
+            <button id="submitCategoryModal" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300">
+                Guardar Categoría
+            </button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        const categoryModal = document.getElementById('categoryModal');
+        const openCategoryModalBtn = document.getElementById('openCategoryModal');
+        const closeCategoryModalBtn = document.getElementById('closeCategoryModal');
+        const submitCategoryModalBtn = document.getElementById('submitCategoryModal');
+        const modalBodyContent = categoryModal.querySelector('.modal-body-content');
+        const categorySelect = document.getElementById('id_category');
+
+        // Function to open the modal
+        openCategoryModalBtn.addEventListener('click', function() {
+            categoryModal.classList.remove('hidden');
+            // Load form via AJAX
+            fetch("{% url 'asset_category_create_popup' %}")
+                .then(response => response.text())
+                .then(html => {
+                    modalBodyContent.innerHTML = html;
+                })
+                .catch(error => {
+                    modalBodyContent.innerHTML = '<p class="text-red-500">Error al cargar el formulario: ' + error + '</p>';
+                });
+        });
+
+        // Function to close the modal
+        closeCategoryModalBtn.addEventListener('click', function() {
+            categoryModal.classList.add('hidden');
+        });
+
+        // Close modal when clicking outside
+        categoryModal.addEventListener('click', function(event) {
+            if (event.target === categoryModal) {
+                categoryModal.classList.add('hidden');
+            }
+        });
+
+        // Handle form submission within the modal
+        submitCategoryModalBtn.addEventListener('click', function() {
+            const form = modalBodyContent.querySelector('form');
+            if (!form) return; // No form loaded yet
+
+            const formData = new FormData(form);
+            const url = form.action;
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest', // Indicate AJAX request
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken') // Get CSRF token from form
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id && data.text) {
+                    // Add new option to the select2 field
+                    var newOption = new Option(data.text, data.id, true, true);
+                    $(categorySelect).append(newOption).trigger('change'); // Use jQuery for select2
+                    categoryModal.classList.add('hidden'); // Close the modal
+                } else if (data.form_html) {
+                    // Display errors in the modal form
+                    modalBodyContent.innerHTML = data.form_html;
+                } else {
+                    alert('Error al guardar la categoría.');
+                }
+            })
+            .catch(error => {
+                alert('Error de red o del servidor: ' + error);
+            });
+        });
+    });
+</script>
 {% endblock %}
