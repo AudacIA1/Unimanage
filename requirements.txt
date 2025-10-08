@@ -1,20 +1,56 @@
-# Framework
+annotated-types==0.7.0
+asgiref==3.9.1
+blis==1.3.0
+catalogue==2.0.10
+certifi==2025.8.3
+charset-normalizer==3.4.3
+click==8.3.0
+cloudpathlib==0.22.0
+colorama==0.4.6
+confection==0.1.5
+cymem==2.0.11
 Django==5.2.6
-
-# Database
-mysqlclient==2.2.7
-
-# Environment Variables
-python-dotenv==1.1.1
-
-# NLP for Chatbot
-spacy==3.8.7
-# spaCy Spanish Model (Medium)
-es-core-news-md @ https://github.com/explosion/spacy-models/releases/download/es_core_news_md-3.8.0/es_core_news_md-3.8.0-py3-none-any.whl#sha256=478b8bb3f3e8eb149192f7d80e7cd64f990b7e9bccbc5329df41a57e86326be2
-
-# Django Dependencies
-asgiref==3.9.2
-sqlparse==0.5.3
-tzdata==2025.2
-django-mptt==0.16.0
 django-autocomplete-light==3.12.1
+django-js-asset==3.1.2
+django-mptt==0.18.0
+djangorestframework==3.16.1
+es_core_news_md @ https://github.com/explosion/spacy-models/releases/download/es_core_news_md-3.8.0/es_core_news_md-3.8.0-py3-none-any.whl#sha256=478b8bb3f3e8eb149192f7d80e7cd64f990b7e9bccbc5329df41a57e86326be2
+es_core_news_sm @ https://github.com/explosion/spacy-models/releases/download/es_core_news_sm-3.8.0/es_core_news_sm-3.8.0-py3-none-any.whl#sha256=e451a83d6df79b87e9eed0cb553f03e99e36a3bab18a7b79f0dcfd1fdf875e12
+idna==3.10
+Jinja2==3.1.6
+langcodes==3.5.0
+language_data==1.3.0
+marisa-trie==1.3.1
+markdown-it-py==4.0.0
+MarkupSafe==3.0.2
+mdurl==0.1.2
+murmurhash==1.0.13
+mysqlclient==2.2.7
+numpy==2.3.3
+packaging==25.0
+preshed==3.0.10
+psycopg2-binary==2.9.10
+pydantic==2.11.9
+pydantic_core==2.33.2
+Pygments==2.19.2
+python-dotenv==1.1.1
+requests==2.32.5
+rich==14.1.0
+setuptools==80.9.0
+shellingham==1.5.4
+smart_open==7.3.1
+spacy==3.8.7
+spacy-legacy==3.0.12
+spacy-loggers==1.0.5
+sqlparse==0.5.3
+srsly==2.5.1
+thinc==8.3.6
+tqdm==4.67.1
+typer==0.19.2
+typing-inspection==0.4.1
+typing_extensions==4.15.0
+tzdata==2025.2
+urllib3==2.5.0
+wasabi==1.1.3
+weasel==0.4.1
+wrapt==1.17.3
