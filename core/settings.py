@@ -142,6 +142,8 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 # Authentication Redirect URLs
 LOGIN_REDIRECT_URL = 'dashboard' # Redirect to dashboard after login
 LOGOUT_REDIRECT_URL = 'dashboard' # Redirect to dashboard after logout (or a login page)
