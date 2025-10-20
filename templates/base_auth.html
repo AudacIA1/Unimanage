@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Gestión de Activos{% endblock %}</title>
+
+    <!-- Theme init: aplicar antes de estilos -->
+    <script>
+      try {
+        const userPref = localStorage.getItem('theme'); // 'dark' | 'light' | null
+        const systemPrefDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        function applyTheme(theme) {
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        }
+
+        if (userPref === 'dark' || (userPref === null && systemPrefDark)) {
+          applyTheme('dark');
+        } else {
+          applyTheme('light');
+        }
+      } catch (err) {
+        console.error('Theme init error', err);
+      }
+    </script>
+
+    <!-- Tailwind config + CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#10B981',
+              secondary: '#6EE7B7',
+              accent: '#FBBF24',
+              dark: '#047857',
+              status_blue: '#3B82F6',
+              status_yellow: '#F59E0B',
+            }
+          }
+        }
+      }
+    </script>
+
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen bg-gray-50 text-slate-900 transition-colors duration-200 dark:bg-slate-900 dark:text-slate-100 flex items-center justify-center">
+
+    <main class="w-full max-w-md p-8 space-y-6 bg-white dark:bg-slate-800 rounded-lg shadow-md">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

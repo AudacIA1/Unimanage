@@ -81,6 +81,17 @@
                 </div>
             </div>
         </div>
+<div class="bg-white p-4 rounded-lg shadow">
+  <h3 class="text-lg font-semibold mb-2">Próximos eventos</h3>
+  <ul>
+    {% for e in upcoming_events %}
+      <li class="text-sm">{{ e.fecha_inicio|date:"d/m/Y" }} — {{ e.titulo }}</li>
+    {% empty %}
+      <li class="text-sm text-gray-500">No hay eventos próximos</li>
+    {% endfor %}
+  </ul>
+  <a href="{% url 'events:calendar_view' %}" class="text-blue-600 text-sm">Ver calendario completo →</a>
+</div>
 
         <!-- Last 10 Loans and Maintenances -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">

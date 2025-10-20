@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from apps.assets.models import AssetCategory, Asset
 from apps.loans.models import Loan
 from apps.maintenance.models import Maintenance
+from apps.events.models import Evento
+from django.utils import timezone
 
 @login_required
 def dashboard(request):
@@ -75,6 +77,7 @@ def dashboard(request):
     # Se preparan los datos para el gráfico de activos por categoría.
     asset_category_labels = [c['categoria'] for c in data_by_category]
     asset_category_data = [c['total'] for c in data_by_category]
+    upcoming_events=Evento.objects.filter(fecha_inicio__gte=timezone.now()).order_by('fecha_inicio')[:5]
 
     # --- 5. Contexto para la Plantilla ---
     context = {
@@ -90,6 +93,7 @@ def dashboard(request):
         "asset_status_data": asset_status_data,
         "asset_category_labels": asset_category_labels,
         "asset_category_data": asset_category_data,
+        "upcoming_events":upcoming_events
     }
 
     return render(request, "dashboard.html", context)

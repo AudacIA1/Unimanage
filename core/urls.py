@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -28,4 +29,7 @@ urlpatterns = [
     
     path("chatbot/", include("apps.chatbot.urls")), # Chatbot URLs
     path("usuarios/", include("apps.usermanagement.urls")), # User Management URLs
+    path('favicon.ico', RedirectView.as_view(url='/static/img/favicon.ico')),
+    path('eventos/', include(('apps.events.urls', 'events'), namespace='events')),
+
 ]

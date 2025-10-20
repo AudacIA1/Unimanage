@@ -1,0 +1,71 @@
+
+**Guion para la Presentación del Proyecto: UniManage**
+
+---
+
+**1. Introducción (Quiénes somos y qué problema resolvemos)**
+
+"Hola a todos, mi nombre es [Tu Nombre] y hoy les presentaré UniManage, un sistema integral para la gestión de activos en entornos universitarios."
+
+"En cualquier universidad, llevar un control eficiente de los equipos —desde proyectores y portátiles hasta material de laboratorio— es un desafío constante. La pérdida de activos, la falta de visibilidad sobre su estado o ubicación, y la gestión manual de préstamos y mantenimientos generan costos, ineficiencias y frustración."
+
+"UniManage nace para solucionar exactamente estos problemas, centralizando toda la gestión de activos en una plataforma web moderna, intuitiva y fácil de usar."
+
+---
+
+**2. ¿Qué es UniManage? (La Solución)**
+
+"UniManage es una aplicación web que permite al personal administrativo y técnico tener un control total sobre el ciclo de vida de cada activo de la institución."
+
+"Nuestra solución se basa en tres pilares fundamentales:"
+
+*   **Control Total:** Saber qué tienes, dónde está y en qué estado se encuentra en todo momento.
+*   **Eficiencia Operativa:** Automatizar tareas manuales como la solicitud de préstamos y la programación de mantenimientos.
+*   **Acceso a la Información:** Ofrecer datos claros y en tiempo real para una mejor toma de decisiones.
+
+---
+
+**3. Demostración de Funcionalidades Clave**
+
+*(En esta sección, se recomienda hacer una demostración en vivo de la aplicación.)*
+
+**a. Panel de Control (Dashboard)**
+"Al iniciar sesión, lo primero que vemos es nuestro dashboard. Este panel ofrece una vista rápida y visual del estado general de nuestro inventario: cuántos activos están disponibles, cuántos en préstamo o en mantenimiento. Esto permite a los gestores identificar tendencias y necesidades de un solo vistazo."
+
+**b. Gestión de Activos**
+"El corazón de UniManage es su módulo de inventario. Aquí podemos registrar cada nuevo activo con información detallada: código de identificación, categoría (por ejemplo, 'Equipo Audiovisual'), ubicación, y estado. El sistema es flexible y permite crear categorías anidadas para una organización más precisa."
+*(Sugerencia: Mostrar cómo se añade un nuevo activo.)*
+
+**c. Gestión de Préstamos**
+"Gestionar quién tiene qué equipo es ahora más fácil que nunca. Con nuestro sistema de préstamos, un usuario puede solicitar un activo, y un administrador puede aprobar, registrar la fecha de salida y la de devolución prevista. Se acabaron los registros en papel o en hojas de cálculo."
+*(Sugerencia: Realizar el proceso de préstamo de un activo a un usuario de prueba.)*
+
+**d. Gestión de Mantenimiento**
+"Los equipos necesitan mantenimiento para alargar su vida útil. UniManage permite programar y registrar cada intervención. Podemos documentar el tipo de mantenimiento realizado, el costo y la fecha, manteniendo un historial completo por cada activo."
+*(Sugerencia: Registrar una tarea de mantenimiento para un activo.)*
+
+**e. Asistente Virtual (Chatbot)**
+"Para agilizar las consultas, hemos integrado un asistente virtual. Cualquier usuario puede preguntar al chatbot por la disponibilidad de un equipo. Por ejemplo: '¿Hay portátiles disponibles?'. El chatbot consulta la base de datos en tiempo real y responde al instante. Esto reduce la carga de trabajo del personal de soporte."
+*(Sugerencia: Hacer una consulta en vivo al chatbot.)*
+
+---
+
+**4. Arquitectura y Tecnología**
+
+"Para los interesados en el aspecto técnico, UniManage está construido sobre una base sólida y moderna:"
+*   **Backend:** Utilizamos Python con el framework Django, conocido por su robustez y seguridad.
+*   **Frontend:** La interfaz está diseñada con Tailwind CSS para un look limpio y es totalmente responsiva. Usamos JavaScript y Chart.js para la interactividad y las visualizaciones de datos.
+*   **Base de Datos:** El sistema corre sobre MySQL, una base de datos fiable y escalable.
+
+---
+
+**5. Conclusión y Pasos Futuros**
+
+"En resumen, UniManage no es solo un inventario digital. Es una solución completa que optimiza la gestión de recursos, mejora la rendición de cuentas y moderniza las operaciones universitarias."
+
+"A futuro, planeamos expandir la plataforma con funcionalidades como:"
+*   **Notificaciones automáticas** por correo para devoluciones pendientes.
+*   **Reportes avanzados** y análisis predictivo sobre la vida útil de los activos.
+*   **Integración con sistemas de autenticación** universitarios existentes (Single Sign-On).
+
+"Gracias por su tiempo. Ahora estaré encantado de responder a sus preguntas."

@@ -3,6 +3,8 @@ import spacy
 from django.http import JsonResponse
 import json
 from .tools import get_available_assets, count_assets_by_status, get_most_recent_loan, create_maintenance_request
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 # --- Carga de Modelos de spaCy ---
 # Se cargan los modelos de NLP al iniciar el servidor para un rendimiento óptimo.
@@ -79,7 +81,7 @@ def chatbot_api(request):
                     if maintenance_id:
                         response_data["response"] = f"¡Hecho! Se ha creado la solicitud de mantenimiento #{maintenance_id}."
                     else:
-                        response_data["response"] = f"Lo siento, no pude crear la solicitud. No encontré un activo con el nombre exacto '{context.get('asset_name')}'."
+                        response_data["response"] = f"Lo siento, no pude crear la solicitud. No encontré un activo con el nombre o ID '{context.get('asset_name')}'."
                 elif intent == 'negacion':
                     response_data["response"] = "Ok, he cancelado el proceso."
                 else:
@@ -106,7 +108,7 @@ def chatbot_api(request):
                 if intent == "reportar_problema":
                     request.session.pop('maintenance_context', None)
                     request.session['conversation_state'] = 'AWAITING_MAINTENANCE_ASSET_NAME'
-                    response_data["response"] = "Entendido. ¿Para qué activo deseas reportar un problema? (Por favor, escribe el nombre exacto)"
+                    response_data["response"] = "Entendido. ¿Para qué activo deseas reportar un problema? (Puedes usar el nombre exacto o su ID)"
                     context_handled = True
 
                 elif intent == "saludo":
@@ -174,3 +176,19 @@ def chatbot_api(request):
             return JsonResponse({'error': 'Ha ocurrido un error interno.'}, status=500)
 
     return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+@csrf_exempt
+@require_POST
+def reset_chatbot_session(request):
+    """
+    Vista para limpiar el estado de la conversación del chatbot de la sesión del usuario.
+    Se llama mediante navigator.sendBeacon() desde el frontend antes de que el usuario
+    navegue a otra página.
+    """
+    try:
+        request.session.pop('conversation_state', None)
+        request.session.pop('maintenance_context', None)
+        return JsonResponse({'status': 'session_cleared'})
+    except Exception as e:
+        print(f"Error clearing chatbot session: {e}")
+        return JsonResponse({'status': 'error'}, status=500)

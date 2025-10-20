@@ -73,16 +73,16 @@ def get_most_recent_loan():
         print(f"Error al buscar el préstamo más reciente: {e}")
         return None
 
-def create_maintenance_request(asset_name: str, description: str):
+def create_maintenance_request(asset_identifier: str, description: str):
     """
     Crea un nuevo registro de mantenimiento para un activo específico.
 
-    Busca un activo por su nombre (ignorando mayúsculas/minúsculas) y, si lo
-    encuentra, crea una solicitud de mantenimiento y actualiza el estado
-    del activo a 'en_mantenimiento'.
+    Busca un activo por su ID (si el identificador es numérico) o por su nombre
+    (si es una cadena de texto). Si lo encuentra, crea una solicitud de
+    mantenimiento y actualiza el estado del activo a 'En mantenimiento'.
 
     Args:
-        asset_name (str): El nombre exacto del activo.
+        asset_identifier (str): El ID o el nombre exacto del activo.
         description (str): La descripción del problema o solicitud.
 
     Returns:
@@ -90,7 +90,13 @@ def create_maintenance_request(asset_name: str, description: str):
              Devuelve None si el activo no se encuentra o si ocurre un error.
     """
     try:
-        asset = Asset.objects.get(name__iexact=asset_name)
+        if asset_identifier.isdigit():
+            # Si el identificador es numérico, búscalo por ID.
+            asset = Asset.objects.get(pk=int(asset_identifier))
+        else:
+            # Si no, búscalo por nombre (ignorando mayúsculas/minúsculas).
+            asset = Asset.objects.get(name__iexact=asset_identifier)
+        
         maintenance = Maintenance.objects.create(
             asset=asset,
             description=description,
@@ -100,8 +106,8 @@ def create_maintenance_request(asset_name: str, description: str):
         asset.status = 'En mantenimiento'
         asset.save()
         return maintenance.id
-    except Asset.DoesNotExist:
-        print(f"Error al crear mantenimiento: No se encontró el activo '{asset_name}'")
+    except (Asset.DoesNotExist, ValueError):
+        print(f"Error al crear mantenimiento: No se encontró el activo '{asset_identifier}'")
         return None
     except Exception as e:
         print(f"Error al crear la solicitud de mantenimiento: {e}")
