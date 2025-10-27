@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Loan
 from .forms import LoanForm
+from apps.accounts.decorators import groups_required
 
 @login_required
 def loan_list(request):
@@ -37,7 +38,7 @@ def loan_list(request):
     }
     return render(request, "loans/loan_list.html", context)
 
-@login_required
+@groups_required(['Admin', 'Staff'])
 def loan_create(request):
     """
     Crea un nuevo préstamo.
@@ -54,7 +55,7 @@ def loan_create(request):
         form = LoanForm()
     return render(request, "loans/loan_form.html", {"form": form})
 
-@login_required
+@groups_required(['Admin', 'Staff'])
 def loan_edit(request, pk):
     """
     Edita un préstamo existente.
@@ -72,7 +73,7 @@ def loan_edit(request, pk):
         form = LoanForm(instance=prestamo)
     return render(request, "loans/loan_form.html", {"form": form})
 
-@login_required
+@groups_required(['Admin', 'Staff'])
 def loan_delete(request, pk):
     """
     Elimina un préstamo existente.

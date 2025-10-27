@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Maintenance
 from .forms import MaintenanceForm
 from apps.assets.models import Asset
+from apps.accounts.decorators import groups_required
 
 @login_required
 def maintenance_list(request):
@@ -38,7 +39,7 @@ def maintenance_list(request):
     }
     return render(request, "maintenance/maintenance_list.html", context)
 
-@login_required
+@groups_required(['Admin', 'Tech'])
 def maintenance_create(request):
     """
     Crea una nueva tarea de mantenimiento.
@@ -55,7 +56,7 @@ def maintenance_create(request):
         form = MaintenanceForm()
     return render(request, "maintenance/maintenance_form.html", {"form": form})
 
-@login_required
+@groups_required(['Admin', 'Tech'])
 def maintenance_edit(request, pk):
     """
     Edita una tarea de mantenimiento existente.
@@ -73,7 +74,7 @@ def maintenance_edit(request, pk):
         form = MaintenanceForm(instance=mantenimiento)
     return render(request, "maintenance/maintenance_form.html", {"form": form})
 
-@login_required
+@groups_required(['Admin', 'Tech'])
 def maintenance_delete(request, pk):
     """
     Elimina una tarea de mantenimiento existente.

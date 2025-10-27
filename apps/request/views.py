@@ -4,6 +4,7 @@ from django.utils import timezone
 from .models import LoanRequest
 from apps.assets.models import Asset
 from django.contrib import messages
+from apps.accounts.decorators import group_required, groups_required
 
 @login_required
 def request_list(request):
@@ -18,7 +19,7 @@ def request_detail(request, pk):
     req = get_object_or_404(LoanRequest, pk=pk)
     return render(request, 'request/request_detail.html', {'req': req})
 
-@login_required
+@group_required('User')
 def request_create(request):
     assets = Asset.objects.filter(status='disponible') # Filter by lowercase 'disponible'
     if request.method == 'POST':
@@ -32,26 +33,24 @@ def request_create(request):
         return redirect('request:request_list')
     return render(request, 'request/request_create.html', {'assets': assets})
 
-@login_required
+@groups_required(['Admin', 'Staff'])
 def request_approve(request, pk):
     req = get_object_or_404(LoanRequest, pk=pk)
-    if request.user.is_staff:
-        req.status = 'approved'
-        req.reviewed_by = request.user
-        req.reviewed_at = timezone.now()
-        req.save()
+    req.status = 'approved'
+    req.reviewed_by = request.user
+    req.reviewed_at = timezone.now()
+    req.save()
     return redirect('request:request_list')
 
 from django.http import JsonResponse
 
-@login_required
+@groups_required(['Admin', 'Staff'])
 def request_reject(request, pk):
     req = get_object_or_404(LoanRequest, pk=pk)
-    if request.user.is_staff:
-        req.status = 'rejected'
-        req.reviewed_by = request.user
-        req.reviewed_at = timezone.now()
-        req.save()
+    req.status = 'rejected'
+    req.reviewed_by = request.user
+    req.reviewed_at = timezone.now()
+    req.save()
     return redirect('request:request_list')
 
 def search_assets(request):

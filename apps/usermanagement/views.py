@@ -17,6 +17,10 @@ class SuperuserRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
         """Comprueba si el usuario que realiza la solicitud es un superusuario."""
         return self.request.user.is_superuser
 
+class UserOwnerOrAdminMixin(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.pk == self.get_object().pk
+
 class UserListView(SuperuserRequiredMixin, ListView):
     """
     Vista para mostrar una lista de todos los usuarios del sistema.
@@ -54,7 +58,7 @@ class UserUpdateForm(forms.ModelForm):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'is_staff', 'is_superuser']
 
-class UserUpdateView(SuperuserRequiredMixin, UpdateView):
+class UserUpdateView(UserOwnerOrAdminMixin, UpdateView):
     """
     Vista para que un superusuario pueda actualizar un usuario existente.
     """

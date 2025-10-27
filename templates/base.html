@@ -1,4 +1,5 @@
 {% load static %}
+{% load role_tags %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -86,12 +87,18 @@
 
     <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     {% block extra_head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-gray-50 text-slate-900 transition-colors duration-200 dark:bg-slate-900 dark:text-slate-100 flex">
+<body x-data="{ open: false }" class="flex min-h-screen bg-gray-100">
+
+  <!-- Botón hamburguesa visible sólo en mobile -->
+  <button @click="open = !open" class="md:hidden p-2 m-2 bg-gray-800 text-white rounded">
+    ☰
+  </button>
 
     <!-- Sidebar -->
-    <aside class="w-64 text-white shadow-lg flex flex-col bg-primary dark:bg-slate-800">
+    <aside :class="open ? 'block' : 'hidden' " class="w-64 text-white shadow-lg flex flex-col bg-primary dark:bg-slate-800 md:block">
         <div class="p-6 text-center border-b border-secondary dark:border-slate-700">
             <a href="{% url 'dashboard' %}" class="text-2xl font-bold flex items-center justify-center space-x-2 text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -102,60 +109,21 @@
         </div>
         <nav class="flex-grow p-4">
             <ul class="space-y-2">
-                <li>
-                    <a href="{% url 'dashboard' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125h9.75a1.125 1.125 0 001.125-1.125V9.75M8.25 21h7.5" />
-                        </svg>
-                        <span>Inicio</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'asset_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                        </svg>
-                        <span>Activos</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'loan_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span>Préstamos</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'maintenance_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.25 2.25 0 0021 17.25l-5.83-5.83M11.42 15.17L5.25 7.25 2.25 4.25 4.25 2.25 7.25 5.25 15.17 11.42z" />
-                        </svg>
-                        <span>Mantenimientos</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'reports:report_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                        </svg>
-                        <span>Reportes</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'user_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Usuarios</span>
-                    </a>
-                </li>
-                <li><a href="{% url 'request:request_list' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v1.5M15 4.5v1.5M10.5 18H13.5M16.5 7.5V18a2.25 2.25 0 01-2.25 2.25H9.75A2.25 2.25 0 017.5 18V7.5m6-3h-3.75a1.125 1.125 0 00-1.125 1.125v3.75c0 .621.504 1.125 1.125 1.125h3.75c.621 0 1.125-.504 1.125-1.125V5.625a1.125 1.125 0 00-1.125-1.125z" />
-                    </svg>
-                    <span>Solicitudes</span>
-                </a></li>
+                {% if user.is_superuser %}
+                    {% include "sidebar/sidebar_admin.html" %}
+                {% else %}
+                    {% in_group user "Tech" as is_tech %}
+                    {% in_group user "Staff" as is_staff %}
+                    {% in_group user "User" as is_user %}
+
+                    {% if is_tech %}
+                        {% include "sidebar/sidebar_tech.html" %}
+                    {% elif is_staff %}
+                        {% include "sidebar/sidebar_staff.html" %}
+                    {% else %}
+                        {% include "sidebar/sidebar_user.html" %}
+                    {% endif %}
+                {% endif %}
             </ul>
         </nav>
         <div class="mt-auto p-4 border-t border-secondary dark:border-slate-700">
@@ -209,89 +177,11 @@
         </div>
     </aside>
 
-    <!-- Main Content Area -->
-    <div class="flex-grow flex flex-col">
-        <main class="flex-grow container mx-auto px-4 py-6">
-            {% block content %}{% endblock %}
-        </main>
-    </div>
+  <!-- Main -->
+  <main class="flex-1 p-6">
+    {% block content %}{% endblock %}
+  </main>
 
-    {% block extra_scripts %}
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/es.js"></script>
-    {% endblock %}
-
-    <!-- Chatbot Bubble -->
-    <div id="chatbot-bubble" class="fixed bottom-5 right-5 w-16 h-16 bg-primary rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-dark transition-colors duration-300">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="white" class="w-8 h-8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.76 9.76 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
-        </svg>
-    </div>
-
-    <!-- Chatbot Window -->
-    <div id="chatbot-window" class="hidden fixed bottom-24 right-5 w-96 h-[70vh] max-h-[700px] bg-white dark:bg-slate-800 rounded-lg shadow-2xl flex flex-col transition-all duration-300">
-        <!-- Header -->
-        <div class="flex justify-between items-center p-4 bg-primary dark:bg-slate-900 text-white rounded-t-lg">
-            <h3 class="font-bold text-lg">Asistente Virtual</h3>
-            <button id="chatbot-close-btn" class="hover:text-gray-300">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
-        </div>
-
-        <!-- Messages -->
-        <div id="chatbot-messages" class="flex-grow p-4 overflow-y-auto">
-            <!-- Mensajes del chatbot se añadirán aquí -->
-        </div>
-        
-        <!-- Suggestions container -->
-        <div id="chatbot-suggestions" class="p-2 flex flex-wrap gap-2 border-t border-gray-200 dark:border-slate-700">
-            <!-- Sugerencias se añadirán aquí -->
-        </div>
-
-        <!-- Input Form -->
-        <div class="border-t border-gray-200 dark:border-slate-700 p-4">
-            <form id="chatbot-form" class="flex items-center space-x-2">
-                <input type="text" id="chatbot-input" placeholder="Escribe tu mensaje..." class="flex-grow p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary dark:bg-slate-700 dark:border-slate-600 dark:text-white">
-                <button type="submit" class="p-2 bg-primary text-white rounded-lg hover:bg-dark transition-colors duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                    </svg>
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
-    <script src="{% static 'js/chatbot.js' %}"></script>
-
-    <!-- Toggle script (al final del body) -->
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const toggle = document.getElementById('theme-toggle');
-      const iconLight = document.getElementById('icon-light');
-      const iconDark  = document.getElementById('icon-dark');
-
-      function updateIcons() {
-        const isDark = document.documentElement.classList.contains('dark');
-        if (isDark) {
-          iconDark.classList.add('hidden');
-          iconLight.classList.remove('hidden');
-        } else {
-          iconDark.classList.remove('hidden');
-          iconLight.classList.add('hidden');
-        }
-      }
-
-      toggle.addEventListener('click', () => {
-        const isDarkNow = document.documentElement.classList.toggle('dark');
-        localStorage.setItem('theme', isDarkNow ? 'dark' : 'light'); // persiste elección
-        updateIcons();
-      });
-
-      // Inicializar iconos según tema actual
-      updateIcons();
-    });
-    </script>
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

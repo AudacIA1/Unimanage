@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from .models import Evento
 from .forms import EventoForm
+from apps.accounts.decorators import groups_required
 
 def calendar_view(request):
     return render(request, 'events/calendar.html')
@@ -20,6 +21,7 @@ def eventos_api(request):
         })
     return JsonResponse(data, safe=False)
 
+@groups_required(['Admin', 'Staff', 'Tech'])
 def evento_create(request):
     if request.method == 'POST':
         form = EventoForm(request.POST)
@@ -29,4 +31,3 @@ def evento_create(request):
     else:
         form = EventoForm()
     return render(request, 'events/event_form.html', {'form': form})
-

@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .forms import AssetCategoryForm # We will create this form
 from django.template.loader import render_to_string
+from apps.accounts.decorators import groups_required, group_required
 
 @login_required
 def asset_list(request):
@@ -59,7 +60,7 @@ def asset_list(request):
     }
     return render(request, "assets/asset_list.html", context)
 
-@login_required
+@groups_required(['Admin', 'Staff'])
 def asset_create(request):
     """
     Crea un nuevo activo.
@@ -76,7 +77,7 @@ def asset_create(request):
         form = AssetForm()
     return render(request, "assets/asset_form.html", {"form": form, "title": "Crear Activo"})
 
-@login_required
+@groups_required(['Admin', 'Staff', 'Tech'])
 def asset_edit(request, pk):
     """
     Edita un activo existente.
@@ -94,7 +95,7 @@ def asset_edit(request, pk):
         form = AssetForm(instance=asset)
     return render(request, "assets/asset_form.html", {"form": form, "title": "Editar Activo"})
 
-@login_required
+@group_required('Admin')
 def asset_delete(request, pk):
     """
     Elimina un activo existente.
