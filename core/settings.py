@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'apps.chatbot',
     'apps.usermanagement',
     'apps.events',
+    'apps.request',
     'core',
 ]
 

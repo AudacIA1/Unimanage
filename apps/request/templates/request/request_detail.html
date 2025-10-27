@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Detalle de Solicitud{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto mt-10 bg-white p-6 shadow rounded">
+  <h2 class="text-xl font-bold mb-4">Detalle de Solicitud de Préstamo</h2>
+  <p><strong>Activo:</strong> {{ req.asset.name }}</p>
+  <p><strong>Usuario:</strong> {{ req.user.username }}</p>
+  <p><strong>Motivo:</strong> {{ req.reason }}</p>
+  <p><strong>Estado:</strong> {{ req.get_status_display }}</p>
+  <p><strong>Fecha de Solicitud:</strong> {{ req.request_date|date:"d/m/Y H:i" }}</p>
+  {% if req.reviewed_by %}
+    <p><strong>Revisado por:</strong> {{ req.reviewed_by.username }}</p>
+    <p><strong>Fecha de Revisión:</strong> {{ req.reviewed_at|date:"d/m/Y H:i" }}</p>
+  {% endif %}
+  <a href="{% url 'request:request_list' %}" class="text-blue-600 mt-4 inline-block">Volver a la lista</a>
+</div>
+{% endblock %}

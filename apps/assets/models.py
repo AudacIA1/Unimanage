@@ -20,49 +20,28 @@ class AssetCategory(MPTTModel):
 
 
 class Asset(models.Model):
-    """
-    Representa un activo individual en el inventario.
-    
-    Cada activo tiene un nombre, una categoría, una ubicación y un estado.
-    También registra cuándo fue creado y actualizado.
-    """
+    STATUS_CHOICES = [
+        ('disponible', 'Disponible'),
+        ('en_uso', 'En uso'),
+        ('mantenimiento', 'En mantenimiento'),
+    ]
     name = models.CharField(max_length=100)
-    asset_code = models.CharField(
-        max_length=255, 
-        unique=True, 
-        blank=True, 
-        null=True, 
-        editable=False, 
-        help_text="Código único para el activo, generado automáticamente."
-    )
+    code = models.CharField(max_length=50, unique=True, blank=True, null=True, editable=False)
     category = models.ForeignKey(AssetCategory, on_delete=models.CASCADE, related_name="assets")
     location = models.CharField(max_length=100)
-    status = models.CharField(max_length=50, choices=[
-        ("Disponible", "Disponible"),
-        ("En uso", "En uso"),
-        ("En mantenimiento", "En mantenimiento"),
-    ])
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='disponible')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        """
-        Sobrescribe el método de guardado para generar un `asset_code` único
-        la primera vez que se crea el objeto.
-        """
-        # El código se genera solo en la primera creación del objeto.
         is_new = self._state.adding
-        # Se guarda el objeto primero para obtener un ID (pk) asignado por la base de datos.
         super().save(*args, **kwargs)
-        # Si es un objeto nuevo y aún no tiene un asset_code...
-        if is_new and not self.asset_code:
-            # Se usa el prefijo de la categoría (si existe) y el ID del objeto.
+        if is_new and not self.code:
             prefix = self.category.name[:3].upper() if self.category else 'GEN'
-            self.asset_code = f'{prefix}-{self.pk:05d}'
-            # Se actualiza el objeto de nuevo, pero usando .update() para evitar
-            # una llamada recursiva al método save().
-            Asset.objects.filter(pk=self.pk).update(asset_code=self.asset_code)
+            self.code = f'{prefix}-{self.pk:05d}'
+            Asset.objects.filter(pk=self.pk).update(code=self.code)
 
     def __str__(self):
-        """Devuelve el nombre del activo."""
-        return self.name
+        return f"{self.name} ({self.code})"
+
+

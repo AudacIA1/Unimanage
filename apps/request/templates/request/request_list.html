@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Solicitudes de préstamo{% endblock %}
+{% block content %}
+<div class="container mx-auto mt-8">
+  <h1 class="text-2xl font-bold mb-4">Solicitudes de préstamo</h1>
+  <a href="{% url 'request:request_create' %}" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4 inline-block">Realizar nueva solicitud</a>
+  {% if user.is_staff %}
+    <p class="text-sm text-gray-600 mb-4">Vista del administrador</p>
+  {% endif %}
+  <table class="min-w-full bg-white shadow rounded">
+    <thead>
+      <tr>
+        <th class="p-2 text-left">Activo</th>
+        <th class="p-2 text-left">Usuario</th>
+        <th class="p-2 text-left">Estado</th>
+        <th class="p-2 text-left">Fecha</th>
+        <th class="p-2 text-left">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in requests %}
+      <tr class="border-t">
+        <td class="p-2">{{ r.asset.name }}</td>
+        <td class="p-2">{{ r.user.username }}</td>
+        <td class="p-2">
+          {% if r.asset.status == 'disponible' %}
+            <span class="text-green-600">● Disponible</span>
+          {% elif r.asset.status == 'en_uso' %}
+            <span class="text-blue-600">● En uso</span>
+          {% else %}
+            <span class="text-yellow-500">● Mantenimiento</span>
+          {% endif %}
+        </td>
+        <td class="p-2">{{ r.request_date|date:"d/m/Y" }}</td>
+        <td class="p-2">
+          {% if user.is_staff and r.status == 'pending' %}
+            <a href="{% url 'request:request_approve' r.id %}" class="text-green-600">Aprobar</a> |
+            <a href="{% url 'request:request_reject' r.id %}" class="text-red-600">Rechazar</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="p-4 text-center text-gray-500">No hay solicitudes registradas.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

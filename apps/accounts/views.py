@@ -13,3 +13,6 @@ def register(request):
     else:
         form = UserRegisterForm()
     return render(request, 'accounts/register.html', {'form': form})
+
+def no_permission_view(request):
+    return render(request, 'accounts/no_permission.html')
