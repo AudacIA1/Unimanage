@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Loan
-from .forms import LoanForm
+from django.utils import timezone
+from .forms import LoanForm, LoanEditForm
 from apps.accounts.decorators import groups_required
 
 @login_required
@@ -28,6 +29,8 @@ def loan_list(request):
     active_loans = prestamos.filter(status="Activo").count()
     returned_loans = prestamos.filter(status="Devuelto").count()
 
+    is_admin_or_staff = request.user.is_superuser or request.user.groups.filter(name__in=['Admin', 'Staff']).exists()
+
     context = {
         "prestamos": prestamos,
         "status_query": status_query,
@@ -35,6 +38,7 @@ def loan_list(request):
         "active_loans": active_loans,
         "returned_loans": returned_loans,
         "loan_statuses": Loan._meta.get_field('status').choices,
+        "is_admin_or_staff": is_admin_or_staff,
     }
     return render(request, "loans/loan_list.html", context)
 
@@ -49,7 +53,9 @@ def loan_create(request):
     if request.method == "POST":
         form = LoanForm(request.POST)
         if form.is_valid():
-            form.save()
+            loan = form.save(commit=False)
+            loan.status = "Activo"
+            loan.save()
             return redirect("loan_list")
     else:
         form = LoanForm()
@@ -65,13 +71,24 @@ def loan_edit(request, pk):
     """
     prestamo = get_object_or_404(Loan, pk=pk)
     if request.method == "POST":
-        form = LoanForm(request.POST, instance=prestamo)
+        form = LoanEditForm(request.POST, instance=prestamo)
         if form.is_valid():
             form.save()
             return redirect("loan_list")
     else:
-        form = LoanForm(instance=prestamo)
+        form = LoanEditForm(instance=prestamo)
     return render(request, "loans/loan_form.html", {"form": form})
+
+@groups_required(['Admin', 'Staff'])
+def loan_return(request, pk):
+    """
+    Marca un préstamo como devuelto y actualiza el estado del activo.
+    """
+    loan = get_object_or_404(Loan, pk=pk)
+    loan.status = 'Devuelto'
+    loan.return_date = timezone.now()
+    loan.save()
+    return redirect("loan_list")
 
 @groups_required(['Admin', 'Staff'])
 def loan_delete(request, pk):

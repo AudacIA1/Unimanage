@@ -9,5 +9,6 @@ urlpatterns = [
     path('<int:pk>/', views.request_detail, name='request_detail'),
     path('<int:pk>/aprobar/', views.request_approve, name='request_approve'),
     path('<int:pk>/rechazar/', views.request_reject, name='request_reject'),
+    path('<int:pk>/borrar/', views.request_delete, name='request_delete'),
     path('buscar/', views.search_assets, name='search_assets'),
 ]

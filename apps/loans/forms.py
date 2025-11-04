@@ -23,4 +23,9 @@ class LoanForm(forms.ModelForm):
 
     class Meta:
         model = Loan
+        fields = ["asset", "user"]
+
+class LoanEditForm(forms.ModelForm):
+    class Meta:
+        model = Loan
         fields = ["asset", "user", "return_date", "status"]

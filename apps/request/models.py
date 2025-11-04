@@ -12,6 +12,8 @@ class LoanRequest(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='loan_requests')
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE, related_name='loan_requests')
     reason = models.TextField(blank=True, null=True, verbose_name="Motivo de la solicitud")
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
     request_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     admin_comment = models.TextField(blank=True, null=True)

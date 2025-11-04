@@ -5,9 +5,9 @@ register = template.Library()
 @register.filter
 def status_to_class(status):
     if status == 'Aprobada':
-        return 'approved'
+        return 'font-bold text-green-600 dark:text-green-400'
     elif status == 'Pendiente':
-        return 'pending'
+        return 'font-bold text-yellow-600 dark:text-yellow-400'
     elif status == 'Rechazada':
-        return 'rejected'
+        return 'font-bold text-red-600 dark:text-red-400'
     return ''

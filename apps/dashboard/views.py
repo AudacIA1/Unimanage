@@ -4,7 +4,9 @@ from apps.accounts.models import UserProfile
 from apps.assets.models import AssetCategory, Asset
 from apps.loans.models import Loan
 from apps.maintenance.models import Maintenance
-from apps.events.models import Evento
+from apps.events.models import Evento, ChecklistItem
+from apps.events.forms import ChecklistItemForm
+from django.forms import inlineformset_factory
 from django.utils import timezone
 
 @login_required
@@ -72,7 +74,22 @@ def dashboard_view(request):
         # Se preparan los datos para el gráfico de activos por categoría.
         asset_category_labels = [c['categoria'] for c in data_by_category]
         asset_category_data = [c['total'] for c in data_by_category]
-        upcoming_events=Evento.objects.filter(fecha_inicio__gte=timezone.now()).order_by('fecha_inicio')[:5]
+        upcoming_events_list = list(Evento.objects.filter(fecha_inicio__gte=timezone.now()).order_by('fecha_inicio').prefetch_related('checklist_items', 'reserved_assets')[:6])
+
+        nearest_event = upcoming_events_list[0] if upcoming_events_list else None
+        other_upcoming_events = upcoming_events_list[1:] if upcoming_events_list else []
+
+        checklist_formset = None
+        if nearest_event:
+            ChecklistItemFormSet = inlineformset_factory(Evento, ChecklistItem, form=ChecklistItemForm, extra=1, can_delete=True)
+            if request.method == 'POST':
+                checklist_formset = ChecklistItemFormSet(request.POST, instance=nearest_event, prefix='checklist')
+                if checklist_formset.is_valid():
+                    checklist_formset.save()
+                    return redirect('dashboard_home') # Redirigir para evitar reenvío de formulario
+            else:
+                checklist_formset = ChecklistItemFormSet(instance=nearest_event, prefix='checklist')
+
         from apps.request.models import LoanRequest
         recent_requests = LoanRequest.objects.order_by('-request_date')[:5]
 
@@ -90,7 +107,9 @@ def dashboard_view(request):
             "asset_status_data": asset_status_data,
             "asset_category_labels": asset_category_labels,
             "asset_category_data": asset_category_data,
-            "upcoming_events":upcoming_events,
+            "nearest_event": nearest_event,
+            "checklist_formset": checklist_formset,
+            "other_upcoming_events": other_upcoming_events,
             "recent_requests": recent_requests
         }
         return render(request, "dashboard/admin_dashboard.html", context)

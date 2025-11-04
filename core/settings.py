@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'mptt',
     'dal',
     'dal_select2',
+    'widget_tweaks', # Add this line
     'apps.assets',
     'apps.loans',
     'apps.maintenance',
@@ -147,8 +148,8 @@ STATICFILES_DIRS = [
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Authentication Redirect URLs
-LOGIN_REDIRECT_URL = 'dashboard' # Redirect to dashboard after login
-LOGOUT_REDIRECT_URL = 'dashboard' # Redirect to dashboard after logout (or a login page)
+LOGIN_REDIRECT_URL = 'dashboard_home' # Redirect to dashboard after login
+LOGOUT_REDIRECT_URL = 'dashboard_home' # Redirect to dashboard after logout (or a login page)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

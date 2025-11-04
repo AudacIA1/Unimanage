@@ -1,10 +1,260 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
 {% block content %}
-<div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow">
-  <h2 class="text-xl font-bold mb-4">Crear evento o visita</h2>
-  <form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Guardar</button>
+<div class="max-w-3xl mx-auto bg-white dark:bg-slate-800 p-6 rounded-lg shadow-md mt-8">
+  <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
+    {% if evento %}Editar Evento{% else %}Crear Evento o Visita{% endif %}
+  </h2>
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="{{ form.titulo.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Título</label>
+        {{ form.titulo|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+        {% if form.titulo.errors %}<p class="text-red-500 text-xs italic">{{ form.titulo.errors }}</p>{% endif %}
+      </div>
+      <div>
+        <label for="{{ form.tipo.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tipo</label>
+        {{ form.tipo|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+        {% if form.tipo.errors %}<p class="text-red-500 text-xs italic">{{ form.tipo.errors }}</p>{% endif %}
+      </div>
+    </div>
+
+    <div>
+      <label for="{{ form.descripcion.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Descripción</label>
+      {{ form.descripcion|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+      {% if form.descripcion.errors %}<p class="text-red-500 text-xs italic">{{ form.descripcion.errors }}</p>{% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="{{ form.fecha_inicio.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de Inicio</label>
+        {{ form.fecha_inicio|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+        {% if form.fecha_inicio.errors %}<p class="text-red-500 text-xs italic">{{ form.fecha_inicio.errors }}</p>{% endif %}
+      </div>
+      <div>
+        <label for="{{ form.fecha_fin.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de Fin</label>
+        {{ form.fecha_fin|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+        {% if form.fecha_fin.errors %}<p class="text-red-500 text-xs italic">{{ form.fecha_fin.errors }}</p>{% endif %}
+      </div>
+    </div>
+
+    <div>
+      <label for="{{ form.lugar.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Lugar</label>
+      {{ form.lugar|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+      {% if form.lugar.errors %}<p class="text-red-500 text-xs italic">{{ form.lugar.errors }}</p>{% endif %}
+    </div>
+
+    <div>
+      <label for="{{ form.responsable.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Responsable</label>
+      {{ form.responsable|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+      {% if form.responsable.errors %}<p class="text-red-500 text-xs italic">{{ form.responsable.errors }}</p>{% endif %}
+    </div>
+
+    <div>
+      <label for="{{ form.attending_entity.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Entidad Asistente</label>
+      {{ form.attending_entity|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+      {% if form.attending_entity.errors %}<p class="text-red-500 text-xs italic">{{ form.attending_entity.errors }}</p>{% endif %}
+    </div>
+
+    <div>
+      <label for="{{ form.max_attendees.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Máximo de Asistentes</label>
+      {{ form.max_attendees|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+      {% if form.max_attendees.errors %}<p class="text-red-500 text-xs italic">{{ form.max_attendees.errors }}</p>{% endif %}
+    </div>
+
+    <div class="mt-6">
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reservar activos</label>
+      <div class="block text-black dark:text-white">
+        {{ form.reserved_assets }}
+      </div>
+      {% if form.reserved_assets.errors %}<p class="text-red-500 text-xs italic">{{ form.reserved_assets.errors }}</p>{% endif %}
+    </div>
+
+    <div class="mt-6">
+      <h3 class="text-lg font-semibold mb-3 text-gray-800 dark:text-white">Checklist del Evento</h3>
+      {{ formset.management_form }}
+      <table class="w-full border-collapse" id="checklist-table">
+        <thead>
+          <tr class="bg-gray-100 dark:bg-slate-700">
+            <th class="p-2 border dark:border-slate-600">Descripción</th>
+            <th class="p-2 border dark:border-slate-600">Realizado</th>
+            {% if formset.can_delete %}<th class="p-2 border dark:border-slate-600">Eliminar</th>{% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for formset_form in formset %}
+            <tr class="formset-row draggable-item">
+              {% for hidden_field in formset_form.hidden_fields %}{{ hidden_field }}{% endfor %}
+              <td class="p-2 border dark:border-slate-600">
+                {{ formset_form.description|add_class:"w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+                {% if formset_form.description.errors %}<p class="text-red-500 text-xs italic">{{ formset_form.description.errors|join:", " }}</p>{% endif %}
+                {{ formset_form.order.as_hidden }}
+              </td>
+              <td class="p-2 border dark:border-slate-600 text-center">
+                {{ formset_form.is_checked }}
+              </td>
+              {% if formset.can_delete %}
+                <td class="p-2 border dark:border-slate-600 text-center">
+                  {{ formset_form.DELETE }}
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <template id="checklist-empty-form">
+        <tr class="formset-row draggable-item">
+          {% for hidden_field in formset.empty_form.hidden_fields %}{{ hidden_field }}{% endfor %}
+          <td class="p-2 border dark:border-slate-600">
+            {{ formset.empty_form.description|add_class:"w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+            {{ formset.empty_form.order.as_hidden }}
+          </td>
+          <td class="p-2 border dark:border-slate-600 text-center">
+            {{ formset.empty_form.is_checked }}
+          </td>
+          {% if formset.can_delete %}
+            <td class="p-2 border dark:border-slate-600 text-center">
+              {{ formset.empty_form.DELETE }}
+            </td>
+          {% endif %}
+        </tr>
+      </template>
+      <button type="button" id="add-checklist-item" class="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">Añadir Ítem al Checklist</button>
+    </div>
+
+    <button type="submit" class="mt-8 px-6 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition duration-200">Guardar Evento</button>
+    {% if evento %}
+      <a href="{% url 'events:evento_delete' evento.pk %}" class="mt-8 px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition duration-200">Eliminar Evento</a>
+    {% endif %}
   </form>
+
+  {% if evento %}
+  <div class="mt-8">
+    <h3 class="text-lg font-semibold mb-3 text-gray-800 dark:text-white">Asistentes</h3>
+    <div class="flex items-center">
+      <a href="{% url 'events:remove_attendee' evento.pk %}" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">-</a>
+      <span class="mx-4 text-lg">{{ evento.current_attendees }} / {{ evento.max_attendees|default:"∞" }}</span>
+      <a href="{% url 'events:add_attendee' evento.pk %}" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">+</a>
+    </div>
+  </div>
+  {% endif %}
 </div>
+{% endblock %} {# Close the content block here #}
+
+{% block extra_scripts %}
+{{ form.media }}
+{{ block.super }}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const addChecklistItemButton = document.getElementById('add-checklist-item');
+    const checklistTableBody = document.querySelector('#checklist-table tbody');
+    const emptyFormTemplate = document.getElementById('checklist-empty-form').innerHTML;
+    const totalFormsInput = document.querySelector('#id_checklist_items-TOTAL_FORMS');
+
+    let formNum = parseInt(totalFormsInput.value);
+
+    function updateElementIndex(el, prefix, ndx) {
+        const id_regex = new RegExp(`(${prefix}-(\d+)-)`);
+        el.innerHTML = el.innerHTML.replace(id_regex, `${prefix}-${ndx}-`);
+        el.querySelectorAll('[id^="id_"]').forEach(function(input) {
+            const name = input.getAttribute('name');
+            const id = input.getAttribute('id');
+            if (name) input.setAttribute('name', name.replace(id_regex, `${prefix}-${ndx}-`));
+            if (id) input.setAttribute('id', id.replace(id_regex, `${prefix}-${ndx}-`));
+        });
+    }
+
+    function updateOrderFields() {
+        checklistTableBody.querySelectorAll('.formset-row').forEach((row, index) => {
+            const orderInput = row.querySelector('input[name$="-order"]');
+            if (orderInput) {
+                orderInput.value = index;
+            }
+            // Update formset indices for all fields in the row
+            updateElementIndex(row, 'checklist_items', index);
+        });
+    }
+
+    addChecklistItemButton.addEventListener('click', function() {
+      let newForm = emptyFormTemplate.replace(/__prefix__/g, formNum);
+      const newRow = document.createElement('tr');
+      newRow.className = 'formset-row draggable-item';
+      newRow.innerHTML = newForm;
+      checklistTableBody.appendChild(newRow);
+      totalFormsInput.value = parseInt(totalFormsInput.value) + 1;
+      formNum++;
+      updateOrderFields(); // Update orders after adding a new item
+      addDragAndDropListeners(newRow); // Add listeners to the new row
+    });
+
+    // Initial order update for existing items
+    updateOrderFields();
+
+    // Drag and Drop functionality
+    let draggedItem = null;
+
+    function addDragAndDropListeners(row) {
+        row.setAttribute('draggable', true);
+        row.addEventListener('dragstart', function(e) {
+            draggedItem = row;
+            setTimeout(() => row.classList.add('dragging'), 0);
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', row.innerHTML); // Set data for Firefox
+        });
+
+        row.addEventListener('dragend', function() {
+            draggedItem.classList.remove('dragging');
+            draggedItem = null;
+            updateOrderFields(); // Update orders after drag ends
+        });
+
+        row.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            const draggingClass = 'dragging';
+            const afterElement = getDragAfterElement(checklistTableBody, e.clientY);
+            const currentElement = document.querySelector(`.${draggingClass}`);
+            if (currentElement === null) return; // No item being dragged
+
+            if (afterElement == null) {
+                checklistTableBody.appendChild(currentElement);
+            } else {
+                checklistTableBody.insertBefore(currentElement, afterElement);
+            }
+        });
+    }
+
+    function getDragAfterElement(container, y) {
+        const draggableElements = [...container.querySelectorAll('.draggable-item:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: -Infinity }).element;
+    }
+
+    checklistTableBody.querySelectorAll('.formset-row').forEach(addDragAndDropListeners);
+
+    // Handle deletion of formset rows
+    checklistTableBody.addEventListener('change', function(e) {
+        if (e.target.name.endsWith('-DELETE')) {
+            const row = e.target.closest('.formset-row');
+            if (e.target.checked) {
+                row.style.display = 'none';
+            } else {
+                row.style.display = '';
+            }
+            updateOrderFields(); // Update orders after deletion
+        }
+    });
+  });
+</script>
 {% endblock %}

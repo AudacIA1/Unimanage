@@ -3,13 +3,8 @@
 {% block content %}
 <div class="p-6 bg-white rounded-lg shadow">
   <div class="flex justify-between mb-4">
-    <h1 class="text-xl font-bold">Calendario de Eventos y Visitas</h1>
-    {% in_group user "Admin" as is_admin %}
-    {% in_group user "Staff" as is_staff %}
-    {% in_group user "Tech" as is_tech %}
-    {% if is_admin or is_staff or is_tech %}
+    <h1 class="text-xl font-bold">Calendario de Eventos</h1>
     <a href="{% url 'events:evento_create' %}" class="bg-blue-600 text-white px-3 py-1 rounded">Nuevo evento</a>
-    {% endif %}
   </div>
 
   <div id="calendar"></div>
@@ -25,6 +20,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initialView: 'dayGridMonth',
     locale: 'es',
     events: '{% url "events:eventos_api" %}',
+    eventClick: function(info) {
+      window.location.href = `/eventos/${info.event.id}/update/`;
+    }
   });
   calendar.render();
 });

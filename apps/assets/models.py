@@ -19,6 +19,8 @@ class AssetCategory(MPTTModel):
         return self.name
 
 
+from django.utils import timezone
+
 class Asset(models.Model):
     STATUS_CHOICES = [
         ('disponible', 'Disponible'),
@@ -32,6 +34,18 @@ class Asset(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='disponible')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def is_available(self, start=None, end=None):
+        if start is None:
+            start = timezone.now()
+        if end is None:
+            end = start
+        overlapping = self.events_reserved_for.filter(
+            fecha_inicio__lt=end,
+            fecha_fin__gt=start,
+            status__in=['approved','active']
+        )
+        return not overlapping.exists()
 
     def save(self, *args, **kwargs):
         is_new = self._state.adding

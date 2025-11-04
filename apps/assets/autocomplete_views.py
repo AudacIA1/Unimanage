@@ -10,7 +10,7 @@ class CategoryAutocomplete(autocomplete.Select2QuerySetView):
 
 class AssetAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        qs = Asset.objects.filter(status='Disponible')
+        qs = Asset.objects.filter(status='disponible')
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)
