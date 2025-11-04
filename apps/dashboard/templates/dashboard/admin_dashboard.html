@@ -5,7 +5,41 @@
 
 {% block extra_head %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <style>
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+          background: #fff;
+          border-radius: 12px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+          padding: 20px;
+          margin-bottom: 20px;
+        }
+        .status {
+            font-weight: bold;
+        }
+        .status.approved {
+          color: green;
+        }
+        .status.pending {
+          color: #F59E0B;
+        }
+        .status.rejected {
+          color: red;
+        }
+        .btn-primary, .btn-secondary {
+          margin-top: 10px;
+          padding: 8px 12px;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+        }
+        .btn-primary { background-color: #3b82f6; color: #fff; }
+        .btn-secondary { background-color: #f3f4f6; color: #333; }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -83,73 +117,19 @@
                 </div>
             </div>
         </div>
-
-        <!-- Checklist and Upcoming Events -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5">
-            <h2 class="text-xl font-semibold text-dark dark:text-white mb-4">Checklist del Próximo Evento</h2>
-            {% if nearest_event %}
-              <form method="post">
-                {% csrf_token %}
-                <h3 class="text-lg font-bold">{{ nearest_event.titulo }}</h3>
-                <p class="text-sm text-gray-500 mb-4">{{ nearest_event.fecha_inicio|date:"d/m/Y H:i" }}</p>
-                {{ checklist_formset.management_form }}
-                <div id="checklist-formset-container" class="space-y-4">
-                  {% for form in checklist_formset %}
-                    <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                      <div class="flex items-center space-x-4">
-                        {{ form.is_checked }}
-                        {{ form.description }}
-                      </div>
-                      {% if checklist_formset.can_delete %}
-                        <div class="flex items-center">
-                          {{ form.DELETE }}
-                          <label for="{{ form.DELETE.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Eliminar</label>
-                        </div>
-                      {% endif %}
-                    </div>
-                  {% endfor %}
-                </div>
-                <div class="flex justify-end space-x-4 mt-6">
-                    <button type="button" id="add-checklist-item" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">Añadir item</button>
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Guardar Checklist</button>
-                </div>
-                <template id="checklist-empty-form">
-                    <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                      <div class="flex items-center space-x-4">
-                        {{ checklist_formset.empty_form.is_checked }}
-                        {{ checklist_formset.empty_form.description }}
-                      </div>
-                      {% if checklist_formset.can_delete %}
-                        <div class="flex items-center">
-                          {{ checklist_formset.empty_form.DELETE }}
-                          <label for="{{ checklist_formset.empty_form.DELETE.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Eliminar</label>
-                        </div>
-                      {% endif %}
-                    </div>
-                </template>
-              </form>
-            {% else %}
-              <p>No hay eventos próximos.</p>
-            {% endif %}
-          </div>
-          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5">
-            <h2 class="text-xl font-semibold text-dark dark:text-white mb-4">Próximos 5 Eventos</h2>
-            {% if other_upcoming_events %}
-              <ul class="space-y-4">
-                {% for event in other_upcoming_events %}
-                  <li class="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0">
-                    <h3 class="text-md font-bold">{{ event.titulo }}</h3>
-                    <p class="text-sm text-gray-500">{{ event.fecha_inicio|date:"d/m/Y H:i" }}</p>
-                  </li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              <p>No hay más eventos próximos.</p>
-            {% endif %}
-          </div>
-        </div>
-    <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5 mb-5">
+<div class="dashboard">
+    <div class="card">
+      <h2 class="text-lg font-semibold mb-2">📅 Próximos eventos</h2>
+      <ul>
+        {% for e in upcoming_events %}
+          <li>{{ e.fecha_inicio|date:"d/m/Y" }} — {{ e.titulo }}</li>
+        {% empty %}
+          <p>No hay eventos próximos</p>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'events:calendar_view' %}"><button class="btn-primary">Ver calendario completo</button></a>
+    </div>
+    <div class="card">
       <h2 class="text-lg font-semibold mb-2">🧾 Solicitudes recientes</h2>
       <ul>
         {% for r in recent_requests %}
@@ -158,7 +138,7 @@
           <p>No hay solicitudes recientes</p>
         {% endfor %}
       </ul>
-      <a href="{% url 'request:request_list' %}"><button class="mt-2 px-3 py-2 border-none rounded-md cursor-pointer bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">Ver todas</button></a>
+      <a href="{% url 'request:request_list' %}"><button class="btn-secondary">Ver todas</button></a>
     </div>
 </div>
 
@@ -235,40 +215,16 @@
 
 {% block extra_scripts %}
 {{ block.super }}
-{{ asset_status_labels|json_script:"asset_status_labels_data" }}
-{{ asset_status_data|json_script:"asset_status_data_data" }}
-{{ asset_category_labels|json_script:"asset_category_labels_data" }}
-{{ asset_category_data|json_script:"asset_category_data_data" }}
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const addChecklistItemButton = document.getElementById('add-checklist-item');
-    if (addChecklistItemButton) {
-      const checklistContainer = document.getElementById('checklist-formset-container');
-      const emptyFormTemplate = document.getElementById('checklist-empty-form').innerHTML;
-      const totalFormsInput = document.querySelector('#id_checklist-TOTAL_FORMS');
-      let formNum = {{ checklist_formset.total_form_count }};
-
-      addChecklistItemButton.addEventListener('click', function() {
-        let newForm = emptyFormTemplate.replace(/__prefix__/g, formNum);
-        checklistContainer.insertAdjacentHTML('beforeend', newForm);
-        totalFormsInput.value = parseInt(totalFormsInput.value) + 1;
-        formNum++;
-      });
-    }
-
-    const assetStatusLabels = JSON.parse(document.getElementById('asset_status_labels_data').textContent);
-    const assetStatusData = JSON.parse(document.getElementById('asset_status_data_data').textContent);
-    const assetCategoryLabels = JSON.parse(document.getElementById('asset_category_labels_data').textContent);
-    const assetCategoryData = JSON.parse(document.getElementById('asset_category_data_data').textContent);
-
+document.addEventListener('DOMContentLoaded', function() {
     // Asset Status Chart (Doughnut Chart)
     const assetStatusCtx = document.getElementById('assetStatusChart').getContext('2d');
     new Chart(assetStatusCtx, {
         type: 'doughnut',
         data: {
-            labels: assetStatusLabels,
+            labels: {{ asset_status_labels|safe }},
             datasets: [{
-                data: assetStatusData,
+                data: {{ asset_status_data|safe }},
                 backgroundColor: [
                     '#10B981', // primary (Disponible)
                     '#3B82F6', // status_blue (En uso)
@@ -296,10 +252,10 @@
     new Chart(assetCategoryCtx, {
         type: 'bar',
         data: {
-            labels: assetCategoryLabels,
+            labels: {{ asset_category_labels|safe }},
             datasets: [{
                 label: 'Número de Activos',
-                data: assetCategoryData,
+                data: {{ asset_category_data|safe }},
                 backgroundColor: '#10B981',
             }]
         },
@@ -323,6 +279,6 @@
             }
         }
     });
-  });
+});
 </script>
 {% endblock %}
