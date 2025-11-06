@@ -5,9 +5,10 @@ from apps.assets.models import AssetCategory, Asset
 from apps.loans.models import Loan
 from apps.maintenance.models import Maintenance
 from apps.events.models import Evento, ChecklistItem
-from apps.events.forms import ChecklistItemForm
+from apps.events.forms import EventoForm, ChecklistItemForm
 from django.forms import inlineformset_factory
 from django.utils import timezone
+from apps.request.models import LoanRequest
 
 @login_required
 def dashboard_view(request):
@@ -82,15 +83,15 @@ def dashboard_view(request):
         checklist_formset = None
         if nearest_event:
             ChecklistItemFormSet = inlineformset_factory(Evento, ChecklistItem, form=ChecklistItemForm, extra=1, can_delete=True)
-            if request.method == 'POST':
-                checklist_formset = ChecklistItemFormSet(request.POST, instance=nearest_event, prefix='checklist')
-                if checklist_formset.is_valid():
-                    checklist_formset.save()
-                    return redirect('dashboard_home') # Redirigir para evitar reenvío de formulario
-            else:
-                checklist_formset = ChecklistItemFormSet(instance=nearest_event, prefix='checklist')
+            checklist_formset = ChecklistItemFormSet(instance=nearest_event, prefix='checklist')
 
-        from apps.request.models import LoanRequest
+            if request.method == 'POST':
+                if 'checklist_submit' in request.POST:
+                    checklist_formset = ChecklistItemFormSet(request.POST, instance=nearest_event, prefix='checklist')
+                    if checklist_formset.is_valid():
+                        checklist_formset.save()
+                        return redirect('dashboard_home')
+
         recent_requests = LoanRequest.objects.order_by('-request_date')[:5]
 
         # --- 5. Contexto para la Plantilla ---
@@ -118,4 +119,10 @@ def dashboard_view(request):
         return render(request, "dashboard/staff_dashboard.html")
 
     else:  # Rol 'user'
-        return render(request, "dashboard/user_dashboard.html")
+        user_loans = Loan.objects.filter(user=request.user)
+        user_requests = LoanRequest.objects.filter(user=request.user)
+        context = {
+            'user_loans': user_loans,
+            'user_requests': user_requests,
+        }
+        return render(request, "dashboard/user_dashboard.html", context)

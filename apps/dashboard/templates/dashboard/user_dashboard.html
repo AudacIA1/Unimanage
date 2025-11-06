@@ -1,6 +1,97 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>User Dashboard</h1>
-<p>Welcome, {{ user.username }}!</p>
+<div class="container mx-auto px-6 py-8">
+
+    <!-- Encabezado -->
+    <div class="flex items-center justify-between mb-10">
+        <div>
+            <h1 class="text-2xl font-semibold text-gray-800 dark:text-white">
+                ¡Bienvenido, <span class="text-emerald-600 dark:text-emerald-400">{{ user.username }}</span>!
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1 text-sm">
+                Aquí puedes consultar tus préstamos y solicitudes de activos.
+            </p>
+        </div>
+    </div>
+
+    <!-- Tarjetas principales -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+        
+        <!-- Mis Préstamos -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div class="flex items-center justify-between bg-emerald-600 text-white px-6 py-4 rounded-t-2xl">
+                <h2 class="text-lg font-semibold"><i class="fas fa-handshake mr-2"></i>Mis Préstamos</h2>
+            </div>
+
+            <div class="p-6 overflow-x-auto">
+                {% if user_loans %}
+                <table class="min-w-full text-sm text-left text-gray-600 dark:text-gray-300">
+                    <thead class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 uppercase text-xs font-semibold">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Activo</th>
+                            <th scope="col" class="px-6 py-3">Fecha Préstamo</th>
+                            <th scope="col" class="px-6 py-3">Fecha Devolución</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        {% for loan in user_loans %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors duration-150">
+                            <td class="px-6 py-4 font-medium">{{ loan.asset.name }}</td>
+                            <td class="px-6 py-4">{{ loan.loan_date|date:"d/m/Y" }}</td>
+                            <td class="px-6 py-4">{{ loan.return_date|date:"d/m/Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-center text-gray-500 dark:text-gray-400 py-6">No tienes préstamos activos.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Mis Solicitudes -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <div class="flex items-center justify-between bg-emerald-600 text-white px-6 py-4 rounded-t-2xl">
+                <h2 class="text-lg font-semibold"><i class="fas fa-clipboard-list mr-2"></i>Mis Solicitudes</h2>
+            </div>
+
+            <div class="p-6 overflow-x-auto">
+                {% if user_requests %}
+                <table class="min-w-full text-sm text-left text-gray-600 dark:text-gray-300">
+                    <thead class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-200 uppercase text-xs font-semibold">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Activo</th>
+                            <th scope="col" class="px-6 py-3">Fecha Solicitud</th>
+                            <th scope="col" class="px-6 py-3">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        {% for request in user_requests %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors duration-150">
+                            <td class="px-6 py-4 font-medium">{{ request.asset.name }}</td>
+                            <td class="px-6 py-4">{{ request.request_date|date:"d/m/Y" }}</td>
+                            <td class="px-6 py-4">
+                                {% if request.status == 'pending' %}
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">Pendiente</span>
+                                {% elif request.status == 'approved' %}
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">Aprobada</span>
+                                {% elif request.status == 'rejected' %}
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">Rechazada</span>
+                                {% else %}
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">{{ request.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-center text-gray-500 dark:text-gray-400 py-6">No tienes solicitudes registradas.</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
 {% endblock %}
