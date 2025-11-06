@@ -58,11 +58,10 @@
         <!-- Distribución por Categorías -->
         <div class="mb-8">
             <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden">
-                <div class="bg-dark dark:bg-slate-700 text-white px-5 py-3 font-semibold text-lg">
-                    <i class="fas fa-layer-group mr-2"></i> Distribución por Categorías de Activos
-                </div>
-                <div class="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {% for item in data_by_category %}
+                                        <div class="bg-dark dark:bg-slate-700 text-white px-5 py-3 font-semibold text-lg">
+                                            <i class="fas fa-layer-group mr-2"></i> Distribución por Categorías de Activos
+                                        </div>
+                                        <div class="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">                    {% for item in data_by_category %}
                     <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 shadow">
                         <h3 class="text-lg font-bold mb-2 dark:text-white">{{ item.categoria }}</h3>
                         <p class="text-sm text-gray-700 dark:text-gray-300">Total: {{ item.total }}</p>
@@ -241,6 +240,7 @@
 {{ asset_category_data|json_script:"asset_category_data_data" }}
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    {% if checklist_formset %}
     const addChecklistItemButton = document.getElementById('add-checklist-item');
     if (addChecklistItemButton) {
       const checklistContainer = document.getElementById('checklist-formset-container');
@@ -255,6 +255,7 @@
         formNum++;
       });
     }
+    {% endif %}
 
     const assetStatusLabels = JSON.parse(document.getElementById('asset_status_labels_data').textContent);
     const assetStatusData = JSON.parse(document.getElementById('asset_status_data_data').textContent);

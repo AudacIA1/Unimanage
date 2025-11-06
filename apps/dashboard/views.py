@@ -68,7 +68,7 @@ def dashboard_view(request):
 
         # --- 4. Datos para Gráficos ---
         # Se preparan los datos para el gráfico de distribución de estados de activos.
-        asset_status_labels = ["Disponible", "En uso", "En mantenimiento"]
+        asset_status_labels = ["disponible", "en_uso", "mantenimiento"]
         asset_status_data = [available_assets, in_use_assets, maintenance_assets]
 
         # Se preparan los datos para el gráfico de activos por categoría.
