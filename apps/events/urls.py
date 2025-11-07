@@ -11,4 +11,9 @@ urlpatterns = [
     path('<int:pk>/delete/', views.evento_delete, name='evento_delete'),
     path('<int:pk>/add_attendee/', views.add_attendee, name='add_attendee'),
     path('<int:pk>/remove_attendee/', views.remove_attendee, name='remove_attendee'),
+
+    path('attending-entities/', views.attending_entity_list, name='attending_entity_list'),
+    path('attending-entities/create/', views.attending_entity_create, name='attending_entity_create'),
+    path('attending-entities/<int:pk>/update/', views.attending_entity_update, name='attending_entity_update'),
+    path('attending-entities/<int:pk>/delete/', views.attending_entity_delete, name='attending_entity_delete'),
 ]

@@ -4,10 +4,11 @@ from apps.accounts.models import UserProfile
 from apps.assets.models import AssetCategory, Asset
 from apps.loans.models import Loan
 from apps.maintenance.models import Maintenance
-from apps.events.models import Evento, ChecklistItem
+from apps.events.models import Evento, ChecklistItem, AttendingEntity
 from apps.events.forms import EventoForm, ChecklistItemForm
 from django.forms import inlineformset_factory
 from django.utils import timezone
+from django.db.models import Sum, Case, When, IntegerField, Count
 from apps.request.models import LoanRequest
 
 @login_required
@@ -94,6 +95,38 @@ def dashboard_view(request):
 
         recent_requests = LoanRequest.objects.order_by('-request_date')[:5]
 
+        # --- Attending Entity Stats ---
+        # Se usa una consulta explícita con Sum y Case para asegurar la precisión del conteo,
+        # ya que el método con Count y filter no estaba arrojando el resultado esperado.
+        entity_stats = AttendingEntity.objects.annotate(
+            visit_count=Sum(
+                Case(When(evento__tipo='visita', then=1), default=0, output_field=IntegerField())
+            )
+        ).values('name', 'visit_count').order_by('-visit_count')
+
+        # --- Datos para Gráficos de Eventos ---
+        # 1. Datos para el gráfico de barras (Eventos por Entidad)
+        entity_events = list(AttendingEntity.objects.annotate(
+            event_count=Count('evento')
+        ).values('name', 'event_count').order_by('-event_count'))
+
+        entity_chart_data = {
+            'labels': [item['name'] for item in entity_events],
+            'data': [item['event_count'] for item in entity_events],
+        }
+
+        # 2. Datos para el gráfico circular (Distribución de Tipos de Evento)
+        event_types = list(Evento.objects.values('tipo').annotate(
+            count=Count('tipo')
+        ).order_by('tipo'))
+        
+        tipo_display_map = dict(Evento.TIPO_CHOICES)
+        
+        type_chart_data = {
+            'labels': [tipo_display_map.get(item['tipo'], item['tipo']) for item in event_types],
+            'data': [item['count'] for item in event_types],
+        }
+
         # --- 5. Contexto para la Plantilla ---
         context = {
             "data_by_category": data_by_category,
@@ -111,7 +144,10 @@ def dashboard_view(request):
             "nearest_event": nearest_event,
             "checklist_formset": checklist_formset,
             "other_upcoming_events": other_upcoming_events,
-            "recent_requests": recent_requests
+            "recent_requests": recent_requests,
+            "entity_stats": entity_stats,
+            "entity_chart_data": entity_chart_data,
+            "type_chart_data": type_chart_data,
         }
         return render(request, "dashboard/admin_dashboard.html", context)
 

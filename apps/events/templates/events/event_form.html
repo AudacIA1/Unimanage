@@ -77,35 +77,37 @@
     <div class="mt-6">
       <h3 class="text-lg font-semibold mb-3 text-gray-800 dark:text-white">Checklist del Evento</h3>
       {{ formset.management_form }}
-      <table class="w-full border-collapse" id="checklist-table">
-        <thead>
-          <tr class="bg-gray-100 dark:bg-slate-700">
-            <th class="p-2 border dark:border-slate-600">Descripción</th>
-            <th class="p-2 border dark:border-slate-600">Realizado</th>
-            {% if formset.can_delete %}<th class="p-2 border dark:border-slate-600">Eliminar</th>{% endif %}
-          </tr>
-        </thead>
-        <tbody>
-          {% for formset_form in formset %}
-            <tr class="formset-row draggable-item">
-              {% for hidden_field in formset_form.hidden_fields %}{{ hidden_field }}{% endfor %}
-              <td class="p-2 border dark:border-slate-600">
-                {{ formset_form.description|add_class:"w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
-                {% if formset_form.description.errors %}<p class="text-red-500 text-xs italic">{{ formset_form.description.errors|join:", " }}</p>{% endif %}
-                {{ formset_form.order.as_hidden }}
-              </td>
-              <td class="p-2 border dark:border-slate-600 text-center">
-                {{ formset_form.is_checked }}
-              </td>
-              {% if formset.can_delete %}
-                <td class="p-2 border dark:border-slate-600 text-center">
-                  {{ formset_form.DELETE }}
-                </td>
-              {% endif %}
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <div class="overflow-x-auto rounded-2xl shadow-lg bg-white dark:bg-[#1b2432] border border-gray-200 dark:border-gray-700">
+          <table class="min-w-full text-sm" id="checklist-table">
+            <thead class="bg-gray-50 dark:bg-[#2b3548] text-gray-500 dark:text-gray-200 uppercase text-xs">
+              <tr>
+                <th class="p-3 text-left">Descripción</th>
+                <th class="p-3 text-left">Realizado</th>
+                {% if formset.can_delete %}<th class="p-3 text-left">Eliminar</th>{% endif %}
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+              {% for formset_form in formset %}
+                <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-[#253045] transition">
+                  {% for hidden_field in formset_form.hidden_fields %}{{ hidden_field }}{% endfor %}
+                  <td class="p-3 text-gray-900 dark:text-gray-100">
+                    {{ formset_form.description|add_class:"w-full rounded-md border-gray-300 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+                    {% if formset_form.description.errors %}<p class="text-red-500 text-xs italic">{{ formset_form.description.errors|join:", " }}</p>{% endif %}
+                    {{ formset_form.order.as_hidden }}
+                  </td>
+                  <td class="p-3 text-gray-900 dark:text-gray-100 text-center">
+                    {{ formset_form.is_checked }}
+                  </td>
+                  {% if formset.can_delete %}
+                    <td class="p-3 text-gray-900 dark:text-gray-100 text-center">
+                      {{ formset_form.DELETE }}
+                    </td>
+                  {% endif %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+      </div>
       <template id="checklist-empty-form">
         <tr class="formset-row draggable-item">
           {% for hidden_field in formset.empty_form.hidden_fields %}{{ hidden_field }}{% endfor %}

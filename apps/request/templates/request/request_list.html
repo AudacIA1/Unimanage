@@ -4,88 +4,70 @@
 {% block title %}Solicitudes de préstamo{% endblock %}
 
 {% block content %}
-<div class="container mx-auto mt-8">
+<div class="p-6 text-gray-100 min-h-screen bg-[#0f1623]">
   {% in_group user "Administrador" as is_admin %}
-  {% if is_admin %}
-    <h1 class="text-2xl font-bold mb-4">Solicitudes por Aprobar</h1>
-    <p class="text-sm text-gray-600 mb-4">Vista del administrador</p>
-  {% else %}
-    <h1 class="text-2xl font-bold mb-4">Mis Solicitudes</h1>
-    <button id="open-modal-button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4 inline-block">Realizar nueva solicitud</button>
-  {% endif %}
+  
+  <div class="max-w-7xl mx-auto">
+    {% if is_admin %}
+      <h1 class="text-3xl font-bold mb-2 text-white">Solicitudes por Aprobar</h1>
+      <p class="text-sm text-gray-400 mb-6">Vista del administrador</p>
+    {% else %}
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-white">Mis Solicitudes</h1>
+        <button id="open-modal-button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">+ Nueva solicitud</button>
+      </div>
+    {% endif %}
 
-  <!-- Modal -->
-  <div id="request-modal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center hidden">
-    <div class="bg-white p-6 rounded shadow-lg w-1/2">
-      <h2 class="text-xl font-bold mb-4">Nueva solicitud de préstamo</h2>
-      <form id="request-form" method="post">
-        {% csrf_token %}
-        <div class="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label for="start_date" class="block text-sm font-medium">Fecha de inicio</label>
-            <input type="datetime-local" id="start_date" name="start_date" class="border p-2 w-full rounded">
-          </div>
-          <div>
-            <label for="end_date" class="block text-sm font-medium">Fecha de fin</label>
-            <input type="datetime-local" id="end_date" name="end_date" class="border p-2 w-full rounded">
-          </div>
-        </div>
-
-        <div class="mb-4">
-          <label for="asset-search" class="block text-sm font-medium">Buscar activo</label>
-          <input type="text" id="asset-search" class="border p-2 w-full rounded" placeholder="Escribe el nombre del activo...">
-          <ul id="asset-results" class="mt-2 border rounded bg-white max-h-40 overflow-auto hidden"></ul>
-        </div>
-
-        <input type="hidden" name="asset_id" id="asset_id">
-        <div id="asset-info" class="hidden mt-4 bg-gray-50 p-4 rounded"></div>
-
-        <label for="reason" class="block mb-2">Motivo</label>
-        <textarea name="reason" id="reason" rows="4" class="w-full p-2 border rounded mb-4"></textarea>
-
-        <div class="flex justify-end">
-          <button type="button" id="close-modal-button" class="bg-gray-400 text-white px-4 py-2 rounded mr-2">Cancelar</button>
-          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Enviar solicitud</button>
-        </div>
-      </form>
+    <!-- Tabla de solicitudes -->
+    <div class="overflow-x-auto rounded-2xl shadow-lg bg-[#1b2432] border border-gray-700">
+      <table class="min-w-full text-sm">
+        <thead class="bg-[#2b3548] text-gray-200 uppercase text-xs">
+          <tr>
+            <th class="p-3 text-left">Activo</th>
+            <th class="p-3 text-left">Usuario</th>
+            <th class="p-3 text-left">Estado</th>
+            <th class="p-3 text-left">Fecha de inicio</th>
+            <th class="p-3 text-left">Fecha de fin</th>
+            <th class="p-3 text-left">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in requests %}
+          <tr class="border-t border-gray-700 hover:bg-[#253045] transition">
+            <td class="p-3">{{ r.asset.name }}</td>
+            <td class="p-3">{{ r.user.username }}</td>
+            <td class="p-3">
+              {% if r.status == "approved" %}
+                <span class="text-green-400 font-semibold">Aprobada</span>
+              {% elif r.status == "rejected" %}
+                <span class="text-red-400 font-semibold">Rechazada</span>
+              {% else %}
+                <span class="text-yellow-400 font-semibold">Pendiente</span>
+              {% endif %}
+            </td>
+            <td class="p-3">{{ r.start_date|date:"d/m/Y" }}</td>
+            <td class="p-3">{{ r.end_date|date:"d/m/Y" }}</td>
+            <td class="p-3 space-x-2">
+              {% if is_admin %}
+                {% if r.status == 'pending' %}
+                  <a href="{% url 'request:request_approve' r.id %}" class="text-green-500 hover:text-green-400 font-semibold">Aprobar</a>
+                  <a href="{% url 'request:request_reject' r.id %}" class="text-yellow-500 hover:text-yellow-400 font-semibold">Rechazar</a>
+                {% endif %}
+                <a href="{% url 'request:request_delete' r.id %}" class="text-red-500 hover:text-red-400 font-semibold">Borrar</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="p-4 text-center text-gray-400">No hay solicitudes registradas.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
   </div>
-
-  <table class="min-w-full bg-white shadow rounded">
-    <thead>
-      <tr>
-        <th class="p-2 text-left">Activo</th>
-        <th class="p-2 text-left">Usuario</th>
-        <th class="p-2 text-left">Estado</th>
-        <th class="p-2 text-left">Fecha de inicio</th>
-        <th class="p-2 text-left">Fecha de fin</th>
-        <th class="p-2 text-left">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in requests %}
-      <tr class="border-t">
-        <td class="p-2">{{ r.asset.name }}</td>
-        <td class="p-2">{{ r.user.username }}</td>
-        <td class="p-2">{{ r.get_status_display }}</td>
-        <td class="p-2">{{ r.start_date|date:"d/m/Y" }}</td>
-        <td class="p-2">{{ r.end_date|date:"d/m/Y" }}</td>
-        <td class="p-2">
-          {% if is_admin %}
-            {% if r.status == 'pending' %}
-              <a href="{% url 'request:request_approve' r.id %}" class="text-green-600">Aprobar</a> |
-              <a href="{% url 'request:request_reject' r.id %}" class="text-red-600">Rechazar</a> |
-            {% endif %}
-            <a href="{% url 'request:request_delete' r.id %}" class="text-red-600">Borrar</a>
-          {% endif %}
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="5" class="p-4 text-center text-gray-500">No hay solicitudes registradas.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
 </div>
+
 
 {% block extra_scripts %}
 <script>

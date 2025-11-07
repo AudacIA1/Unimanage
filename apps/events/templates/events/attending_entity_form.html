@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="p-6 bg-white rounded-lg shadow">
+  <h1 class="text-xl font-bold mb-4">{% if form.instance.pk %}Editar{% else %}Nueva{% endif %} Entidad Asistente</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded">Guardar</button>
+  </form>
+</div>
+{% endblock %}

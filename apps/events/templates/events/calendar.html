@@ -1,30 +1,146 @@
 {% extends 'base.html' %}
 {% load role_tags %}
+
+{% block extra_head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <style>
+        /* Estilos para DataTables modo oscuro */
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_processing,
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            color: #e2e8f0 !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+            color: #94a3b8 !important;
+        }
+        .dataTables_wrapper .dataTables_length select {
+            background-color: #475569;
+            color: #e2e8f0;
+        }
+        .dataTables_wrapper .dataTables_filter input {
+            background-color: #475569;
+            color: #e2e8f0;
+        }
+        table.dataTable tbody tr {
+            background-color: #334155;
+        }
+        table.dataTable tbody tr:hover {
+            background-color: #475569 !important;
+        }
+        table.dataTable thead th {
+            color: #f1f5f9;
+        }
+    </style>
+{% endblock %}
+
+
 {% block content %}
-<div class="p-6 bg-white rounded-lg shadow">
-  <div class="flex justify-between mb-4">
-    <h1 class="text-xl font-bold">Calendario de Eventos</h1>
-    <a href="{% url 'events:evento_create' %}" class="bg-blue-600 text-white px-3 py-1 rounded">Nuevo evento</a>
-  </div>
 
-  <div id="calendar"></div>
+<div class="space-y-8">
+    <div class="p-6 bg-white dark:bg-slate-800 rounded-lg shadow">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-2 sm:mb-0">Calendario de Eventos</h1>
+            {% is_in_groups user "Admin,Staff,Tech,Administrador" as can_create_event %}
+            {% if can_create_event %}
+            <a href="{% url 'events:evento_create' %}" class="px-4 py-2 bg-primary text-white rounded-lg shadow hover:bg-dark transition-colors duration-200">
+                <i class="fas fa-plus mr-2"></i>Nuevo Evento
+            </a>
+            {% endif %}
+        </div>
+        <div id="calendar" class="text-gray-800 dark:text-white"></div>
+    </div>
+
+    <div class="p-6 bg-white dark:bg-slate-800 rounded-lg shadow">
+        <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Lista de Eventos</h2>
+        <div class="overflow-x-auto">
+            <table id="eventsTable" class="display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th>Fecha de Inicio</th>
+                        <th>Lugar</th>
+                        <th>Responsable</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events_for_table %}
+                    <tr>
+                        <td class="dark:text-gray-300">{{ event.titulo }}</td>
+                        <td class="dark:text-gray-300">{{ event.get_tipo_display }}</td>
+                        <td class="dark:text-gray-300">{{ event.get_status_display }}</td>
+                        <td class="dark:text-gray-300">{{ event.fecha_inicio|date:"d/m/Y H:i" }}</td>
+                        <td class="dark:text-gray-300">{{ event.lugar|default:"N/A" }}</td>
+                        <td class="dark:text-gray-300">{{ event.responsable.username|default:"N/A" }}</td>
+                        <td>
+                            {% is_in_groups user "Admin,Staff,Tech,Administrador" as can_edit_event %}
+                            {% if can_edit_event %}
+                            <a href="{% url 'events:evento_update' event.pk %}" class="text-blue-500 hover:underline">Editar</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+{% endblock %}
 
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+
+{% block extra_scripts %}
+{{ block.super }}
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const calendarEl = document.getElementById('calendar');
-  const calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: 'dayGridMonth',
-    locale: 'es',
-    events: '{% url "events:eventos_api" %}',
-    eventClick: function(info) {
-      window.location.href = `/eventos/${info.event.id}/update/`;
+    // --- FullCalendar Init ---
+    try {
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'es',
+            height: 'auto',
+            events: '{% url "events:eventos_api" %}',
+            eventClick: function(info) {
+                {% is_in_groups user "Admin,Staff,Tech,Administrador" as can_edit_event %}
+                {% if can_edit_event %}
+                    window.location.href = `/eventos/${info.event.id}/update/`;
+                {% endif %}
+            },
+            // Adaptar colores al tema oscuro/claro
+            eventDidMount: function(info) {
+                if (document.documentElement.classList.contains('dark')) {
+                    info.el.style.backgroundColor = '#1e293b';
+                    info.el.style.borderColor = '#334155';
+                }
+            }
+        });
+        calendar.render();
+    } catch (error) {
+        console.error("Error initializing FullCalendar:", error);
     }
-  });
-  calendar.render();
+
+    // --- DataTable Init ---
+    $('#eventsTable').DataTable({
+        language: {
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json',
+        },
+        responsive: true,
+        // Aplicar clases de Tailwind para modo oscuro
+        "initComplete": function(settings, json) {
+            if (document.documentElement.classList.contains('dark')) {
+                $('.dataTables_wrapper').addClass('dark-mode');
+            }
+        }
+    });
 });
 </script>
 {% endblock %}

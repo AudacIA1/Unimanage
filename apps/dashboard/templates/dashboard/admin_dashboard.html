@@ -5,275 +5,332 @@
 
 {% block extra_head %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <style>
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
         }
-        .card {
-          background: #fff;
-          border-radius: 12px;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-          padding: 20px;
-          margin-bottom: 20px;
+        button:hover {
+            transform: scale(1.05);
         }
-        .status {
-            font-weight: bold;
+        thead {
+            background: linear-gradient(90deg, #10B98120, #3B82F620);
         }
-        .status.approved {
-          color: green;
+        tbody tr:hover {
+            background-color: rgba(16, 185, 129, 0.05);
         }
-        .status.pending {
-          color: #F59E0B;
-        }
-        .status.rejected {
-          color: red;
-        }
-        .btn-primary, .btn-secondary {
-          margin-top: 10px;
-          padding: 8px 12px;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-        }
-        .btn-primary { background-color: #3b82f6; color: #fff; }
-        .btn-secondary { background-color: #f3f4f6; color: #333; }
     </style>
 {% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto">
-    <header class="mb-8">
-        <h1 class="text-4xl font-bold text-primary dark:text-primary tracking-tight">Panel de Reportes de Activos</h1>
-        <p class="text-secondary dark:text-secondary mt-1">Resumen completo del estado de los activos y categorías.</p>
-    </header>
+{{ entity_chart_data|json_script:"entity_chart_data" }}
+{{ type_chart_data|json_script:"type_chart_data" }}
+
+<div class="p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+        <h1 class="text-4xl font-bold text-primary dark:text-primary tracking-tight">Panel de Reportes</h1>
+        </h1>
+        <button class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
+            <i class="fa-solid fa-download mr-1"></i> Exportar Reporte
+        </button>
+    </div>
 
     <!-- Main Content -->
-    <div class="container mx-auto px-4 mb-16">
-
-        <!-- General Metrics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5 text-center">
-                <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300">Total Activos</h3>
-                <p class="text-4xl font-bold text-dark dark:text-white">{{ total_assets }}</p>
-            </div>
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5 text-center">
-                <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300">Disponibles</h3>
-                <p class="text-4xl font-bold text-primary dark:text-primary">{{ available_assets }}</p>
-            </div>
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5 text-center">
-                <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300">En Uso</h3>
-                <p class="text-4xl font-bold text-status_blue dark:text-status_blue">{{ in_use_assets }}</p>
-            </div>
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5 text-center">
-                <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300">En Mantenimiento</h3>
-                <p class="text-4xl font-bold text-status_yellow dark:text-status_yellow">{{ maintenance_assets }}</p>
-            </div>
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5 text-center">
-                <h3 class="text-lg font-bold text-gray-700 dark:text-gray-300">Categorías</h3>
-                <p class="text-4xl font-bold text-dark dark:text-white">{{ total_categories }}</p>
-            </div>
+    <div x-data="{ tab: 'resumen' }" class="space-y-6 container mx-auto px-4 mb-16">
+        <div class="flex space-x-4 border-b pb-2">
+            <button @click="tab='resumen'" :class="tab==='resumen' ? 'text-green-600 font-semibold' : 'text-gray-500'">Resumen</button>
+            <button @click="tab='graficos'" :class="tab==='graficos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Gráficos</button>
+            <button @click="tab='eventos'" :class="tab==='eventos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Eventos</button>
+            <button @click="tab='historial'" :class="tab==='historial' ? 'text-green-600 font-semibold' : 'text-gray-500'">Historial</button>
         </div>
 
-
-        <!-- Charts Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5">
-                <h2 class="text-xl font-semibold text-dark dark:text-white mb-4">Distribución de Activos por Estado</h2>
-                <canvas id="assetStatusChart"></canvas>
+        <div x-show="tab==='resumen'" class="space-y-8">
+            <!-- General Metrics Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-green-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-md hover:shadow-xl transition-all border border-green-100 dark:border-slate-700">
+                    <i class="fas fa-box-open text-green-500 text-3xl mb-2"></i>
+                    <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400">Total Activos</h3>
+                    <p class="text-4xl font-bold text-gray-900 dark:text-white">{{ total_assets }}</p>
+                </div>
+                <div class="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-md hover:shadow-xl transition-all border border-blue-100 dark:border-slate-700">
+                    <i class="fas fa-check-circle text-primary text-3xl mb-2"></i>
+                    <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400">Disponibles</h3>
+                    <p class="text-4xl font-bold text-primary dark:text-primary">{{ available_assets }}</p>
+                </div>
+                <div class="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-indigo-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-md hover:shadow-xl transition-all border border-indigo-100 dark:border-slate-700">
+                    <i class="fas fa-cogs text-blue-500 text-3xl mb-2"></i>
+                    <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400">En Uso</h3>
+                    <p class="text-4xl font-bold text-blue-500 dark:text-blue-500">{{ in_use_assets }}</p>
+                </div>
+                <div class="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-yellow-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-md hover:shadow-xl transition-all border border-yellow-100 dark:border-slate-700">
+                    <i class="fas fa-tools text-yellow-500 text-3xl mb-2"></i>
+                    <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400">En Mantenimiento</h3>
+                    <p class="text-4xl font-bold text-yellow-500 dark:text-yellow-500">{{ maintenance_assets }}</p>
+                </div>
+                <div class="flex flex-col items-center justify-center p-6 bg-gradient-to-br from-gray-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-md hover:shadow-xl transition-all border border-gray-100 dark:border-slate-700">
+                    <i class="fas fa-layer-group text-gray-500 text-3xl mb-2"></i>
+                    <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-400">Categorías</h3>
+                    <p class="text-4xl font-bold text-gray-900 dark:text-white">{{ total_categories }}</p>
+                </div>
             </div>
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5">
-                <h2 class="text-xl font-semibold text-dark dark:text-white mb-4">Activos por Categoría</h2>
-                <canvas id="assetCategoryChart"></canvas>
-            </div>
-        </div>
 
-        <!-- Distribución por Categorías -->
-        <div class="mb-8">
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden">
-                                        <div class="bg-dark dark:bg-slate-700 text-white px-5 py-3 font-semibold text-lg">
-                                            <i class="fas fa-layer-group mr-2"></i> Distribución por Categorías de Activos
-                                        </div>
-                                        <div class="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">                    {% for item in data_by_category %}
-                    <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 shadow">
-                        <h3 class="text-lg font-bold mb-2 dark:text-white">{{ item.categoria }}</h3>
+            <!-- Distribución por Categorías -->
+            <div class="p-6 bg-gradient-to-br from-white to-slate-50 dark:bg-[#1b2432] rounded-2xl shadow-lg border border-slate-100 dark:border-gray-700">
+                <div class="bg-dark dark:bg-[#2b3548] text-white px-5 py-3 font-semibold text-lg rounded-t-xl">
+                    <i class="fas fa-layer-group mr-2"></i> Distribución por Categorías de Activos
+                </div>
+                <div class="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {% for item in data_by_category %}
+                    <div class="bg-gray-100 dark:bg-[#253045] rounded-lg p-4 shadow">
+                        <h3 class="text-lg font-bold mb-2 text-gray-800 dark:text-gray-200">{{ item.categoria }}</h3>
                         <p class="text-sm text-gray-700 dark:text-gray-300">Total: {{ item.total }}</p>
                         <div class="w-full bg-gray-300 dark:bg-gray-600 rounded-full h-4 mt-3 flex">
                             <div class="h-4 rounded-l-full" style="width: {{ item.disponibles_pct }}%; background-color: #10B981;"></div>
-                            <div class="h-4" style="width: {{ item.en_uso_pct }}%; background-color: #3B82F6;"></div>
-                            <div class="h-4 rounded-r-full" style="width: {{ item.mantenimiento_pct }}%; background-color: #F59E0B;"></div>
+                            <div class="h-4" style="width: {{ item.en_uso_pct }}%; background-color: #2563EB;"></div>
+                            <div class="h-4 rounded-r-full" style="width: {{ item.mantenimiento_pct }}%; background-color: #FBBF24;"></div>
                         </div>
                         <div class="mt-3 text-sm">
-                            <span class="text-primary dark:text-primary font-semibold">{{ item.disponibles }} disponibles</span> | 
-                            <span class="text-status_blue dark:text-status_blue font-semibold">{{ item.en_uso }} en uso</span> | 
-                            <span class="text-status_yellow dark:text-status_yellow font-semibold">{{ item.mantenimiento }} en mant.</span>
+                            <span class="text-primary dark:text-green-400 font-semibold">{{ item.disponibles }} disponibles</span> |
+                            <span class="text-blue-500 dark:text-blue-500 font-semibold">{{ item.en_uso }} en uso</span> |
+                            <span class="text-yellow-500 dark:text-yellow-400 font-semibold">{{ item.mantenimiento }} en mant.</span>
                         </div>
                     </div>
                     {% empty %}
-                    <p class="col-span-4 text-center text-gray-500 dark:text-gray-400">No hay categorías registradas.</p>
-                    {% endfor %}
+                                    <p class="col-span-4 text-center text-gray-500 dark:text-gray-400">No hay categorías registradas.</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                    
+                          
+                        </div>
+        <div x-show="tab==='graficos'" class="space-y-8">
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Distribución de Activos por Estado</h2>
+                    <canvas id="assetStatusChart"></canvas>
+                </div>
+                <div class="p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Activos por Categoría</h2>
+                    <canvas id="assetCategoryChart"></canvas>
+                </div>
+                <!-- Eventos por Entidad -->
+                <div class="p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Eventos por Entidad</h2>
+                    <canvas id="entityChart"></canvas>
+                </div>
+                <!-- Distribución por Tipo de Evento -->
+                <div class="p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Distribución por Tipo de Evento</h2>
+                    <canvas id="typeChart"></canvas>
                 </div>
             </div>
         </div>
-        <!-- Checklist and Upcoming Events -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5">
-            <h2 class="text-xl font-semibold text-dark dark:text-white mb-4">Próximo Evento</h2>
-            {% if nearest_event %}
-              <h3 class="text-lg font-bold">{{ nearest_event.titulo }}</h3>
-              <p class="text-sm text-gray-500 mb-4">{{ nearest_event.fecha_inicio|date:"d/m/Y H:i" }}</p>
-              <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Lugar:</strong> {{ nearest_event.lugar }}</p>
-              <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Responsable:</strong> {{ nearest_event.responsable }}</p>
-              <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Asistentes:</strong> {{ nearest_event.current_attendees }} / {{ nearest_event.max_attendees|default:"-" }}</p>
-              <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Entidad que asiste:</strong> {{ nearest_event.attending_entity|default:"-" }}</p>
-              <h4 class="text-md font-semibold text-dark dark:text-white mt-4 mb-2">Checklist</h4>
-              <form method="post">
-                {% csrf_token %}
-                {{ checklist_formset.management_form }}
-                <div id="checklist-formset-container" class="space-y-4">
-                  {% for form in checklist_formset %}
-                    <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                      <div class="flex items-center space-x-4">
-                        {{ form.is_checked }}
-                        {{ form.description }}
-                      </div>
-                      {% if checklist_formset.can_delete %}
-                        <div class="flex items-center">
-                          {{ form.DELETE }}
-                          <label for="{{ form.DELETE.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Eliminar</label>
-                        </div>
-                      {% endif %}
-                    </div>
-                  {% endfor %}
-                </div>
-                <div class="flex justify-end space-x-4 mt-6">
-                    <button type="button" id="add-checklist-item" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">Añadir item</button>
-                    <button type="submit" name="checklist_submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Guardar Checklist</button>
-                </div>
-                <template id="checklist-empty-form">
-                    <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                      <div class="flex items-center space-x-4">
-                        {{ checklist_formset.empty_form.is_checked }}
-                        {{ checklist_formset.empty_form.description }}
-                      </div>
-                      {% if checklist_formset.can_delete %}
-                        <div class="flex items-center">
-                          {{ checklist_formset.empty_form.DELETE }}
-                          <label for="{{ checklist_formset.empty_form.DELETE.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Eliminar</label>
-                        </div>
-                      {% endif %}
-                    </div>
-                </template>
-              </form>
-            {% else %}
-              <p>No hay eventos próximos.</p>
-            {% endif %}
-          </div>
-          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md p-5">
-            <h2 class="text-xl font-semibold text-dark dark:text-white mb-4">Próximos 5 Eventos</h2>
-            {% if other_upcoming_events %}
-              <ul class="space-y-4">
-                {% for event in other_upcoming_events %}
-                  <li class="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0">
-                    <h3 class="text-md font-bold">{{ event.titulo }}</h3>
-                    <p class="text-sm text-gray-500">{{ event.fecha_inicio|date:"d/m/Y H:i" }}</p>
-                  </li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              <p>No hay más eventos próximos.</p>
-            {% endif %}
-          </div>
-        </div>
-    <div class="card">
-      <h2 class="text-lg font-semibold mb-2">🧾 Solicitudes recientes</h2>
-      <ul>
-        {% for r in recent_requests %}
-          <li>{{ r.user.username }} pidió <strong>{{ r.asset.name }}</strong> <span class="status {{ r.get_status_display|status_to_class }}">{{ r.get_status_display }}</span></li>
-        {% empty %}
-          <p>No hay solicitudes recientes</p>
-        {% endfor %}
-      </ul>
-      <a href="{% url 'request:request_list' %}"><button class="btn-secondary">Ver todas</button></a>
-    </div>
-</div>
 
-        <!-- Last 10 Loans and Maintenances -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
-            <!-- Last 10 Loans -->
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden">
-                <div class="bg-dark dark:bg-slate-700 text-white px-5 py-3 font-semibold text-lg">
-                    <i class="fas fa-handshake mr-2"></i> Últimos 10 Préstamos
-                </div>
-                <div class="p-5">
-                    {% if last_10_loans %}
-                    <table id="loansTable" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-slate-700">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Activo</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Usuario</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fecha Préstamo</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            {% for loan in last_10_loans %}
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ loan.asset.name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ loan.user.username }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ loan.loan_date|date:"d/m/Y" }}</td>
-                            </tr>
+        <div x-show="tab==='eventos'" class="space-y-8">
+            <!-- Checklist and Upcoming Events -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-gradient-to-r from-green-100 to-green-50 dark:from-green-800/30 dark:to-slate-800 p-5 rounded-2xl shadow-md border border-green-200 dark:border-green-700">
+                    <div class="flex items-center mb-3">
+                        <i class="fa-solid fa-calendar-day text-green-600 text-2xl mr-2"></i>
+                        <h2 class="text-2xl font-bold text-green-800 dark:text-green-400">Próximo Evento</h2>
+                    </div>
+                    {% if nearest_event %}
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ nearest_event.titulo }}</h3>
+                    <p class="text-sm text-gray-500 mb-4"><i class="fa-regular fa-clock mr-1"></i>{{ nearest_event.fecha_inicio|date:"d/m/Y H:i" }}</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Lugar:</strong> {{ nearest_event.lugar }}</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Responsable:</strong> {{ nearest_event.responsable }}</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Asistentes:</strong> {{ nearest_event.current_attendees }} / {{ nearest_event.max_attendees|default:"-" }}</p>
+                    <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Entidad que asiste:</strong> {{ nearest_event.attending_entity|default:"-" }}</p>
+                    <h4 class="text-lg font-semibold text-gray-700 dark:text-white mt-4 mb-2">Checklist</h4>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ checklist_formset.management_form }}
+                        <div id="checklist-formset-container" class="space-y-4">
+                            {% for form in checklist_formset %}
+                            <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    {{ form.is_checked }}
+                                    {{ form.description }}
+                                </div>
+                                {% if checklist_formset.can_delete %}
+                                <div class="flex items-center">
+                                    {{ form.DELETE }}
+                                    <label for="{{ form.DELETE.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Eliminar</label>
+                                </div>
+                                {% endif %}
+                            </div>
                             {% endfor %}
-                        </tbody>
-                    </table>
+                        </div>
+                        <div class="flex justify-end space-x-4 mt-6">
+                            <button type="button" id="add-checklist-item" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">Añadir item</button>
+                            <button type="submit" name="checklist_submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Guardar Checklist</button>
+                        </div>
+                        <template id="checklist-empty-form">
+                            <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                                <div class="flex items-center space-x-4">
+                                    {{ checklist_formset.empty_form.is_checked }}
+                                    {{ checklist_formset.empty_form.description }}
+                                </div>
+                                {% if checklist_formset.can_delete %}
+                                <div class="flex items-center">
+                                    {{ checklist_formset.empty_form.DELETE }}
+                                    <label for="{{ checklist_formset.empty_form.DELETE.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Eliminar</label>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </template>
+                    </form>
                     {% else %}
-                    <p class="text-center text-gray-500 dark:text-gray-400">No hay préstamos recientes.</p>
+                    <p class="text-sm text-gray-500">No hay eventos próximos.</p>
                     {% endif %}
                 </div>
-            </div>
-
-            <!-- Last 10 Maintenances -->
-            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden">
-                <div class="bg-dark dark:bg-slate-700 text-white px-5 py-3 font-semibold text-lg">
-                    <i class="fas fa-tools mr-2"></i> Últimos 10 Mantenimientos
-                </div>
-                <div class="p-5">
-                    {% if last_10_maintenances %}
-                    <table id="maintenancesTable" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-slate-700">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Activo</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-gray-700">
-                            {% for maintenance in last_10_maintenances %}
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ maintenance.asset.name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ maintenance.status }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ maintenance.created_at|date:"d/m/Y" }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <div class="bg-gradient-to-r from-green-100 to-green-50 dark:from-green-800/30 dark:to-slate-800 p-5 rounded-2xl shadow-md border border-green-200 dark:border-green-700">
+                                            <h2 class="text-2xl font-bold text-green-800 dark:text-green-400">Próximos 5 Eventos</h2>
+                    {% if other_upcoming_events %}
+                    <ul class="space-y-4">
+                        {% for event in other_upcoming_events %}
+                        <li class="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0">
+                            <h3 class="text-lg font-semibold text-gray-700">{{ event.titulo }}</h3>
+                            <p class="text-sm text-gray-500">{{ event.fecha_inicio|date:"d/m/Y H:i" }}</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
                     {% else %}
-                    <p class="text-center text-gray-500 dark:text-gray-400">No hay mantenimientos recientes.</p>
+                    <p class="text-sm text-gray-500">No hay más eventos próximos.</p>
                     {% endif %}
                 </div>
+                  <!-- Attending Entity Stats -->
+                            <div class="p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
+                                <div class="bg-dark dark:bg-slate-700 text-white px-5 py-3 font-semibold text-lg rounded-t-xl">
+                                    <i class="fas fa-building mr-2"></i> Estadísticas de Visitas por Entidad
+                                </div>
+                                <div class="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {% for entity in entity_stats %}
+                                    <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 shadow">
+                                        <h3 class="text-lg font-bold mb-2 dark:text-white">{{ entity.name }}</h3>
+                                        <p class="text-sm text-gray-700 dark:text-gray-300">Visitas: {{ entity.visit_count }}</p>
+                                    </div>
+                                    {% empty %}
+                                    <p class="col-span-4 text-center text-gray-500 dark:text-gray-400">No hay entidades registradas.</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+            </div>
+        </div>
+
+<div x-show="tab==='historial'" class="space-y-10">
+
+    <!-- 🔹 Solicitudes Recientes -->
+    <div class="bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/40 dark:to-slate-900 p-6 rounded-2xl shadow-md border border-green-300 dark:border-green-700 hover:shadow-lg transition-all">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-xl font-semibold text-green-700 dark:text-green-400 flex items-center">
+                <i class="fas fa-clipboard-list mr-2"></i> Solicitudes recientes
+            </h2>
+            <a href="{% url 'request:request_list' %}">
+                <button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg shadow transition-all">
+                    Ver todas
+                </button>
+            </a>
+        </div>
+
+        <ul class="space-y-1 text-sm dark:text-gray-200">
+            {% for r in recent_requests %}
+            <li class="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800 rounded-lg hover:bg-green-50 dark:hover:bg-slate-700 transition-all">
+                <span>
+                    <strong>{{ r.user.username }}</strong> pidió 
+                    <span class="font-semibold">{{ r.asset.name }}</span>
+                </span>
+                <span class="status {{ r.get_status_display|status_to_class }} font-semibold">
+                    {{ r.get_status_display }}
+                </span>
+            </li>
+            {% empty %}
+            <p class="text-sm text-gray-500">No hay solicitudes recientes</p>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- 🔹 Últimos Préstamos y Mantenimientos -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- 🟩 Últimos 10 Préstamos -->
+        <div class="rounded-2xl overflow-hidden shadow-md bg-white dark:bg-[#1b2432] border border-green-200 dark:border-gray-700 hover:shadow-lg transition-all">
+            <div class="flex items-center justify-between bg-green-600 text-white px-5 py-3 font-semibold text-lg dark:bg-[#2b3548]">
+                <h3><i class="fas fa-handshake mr-2"></i> Últimos 10 Préstamos</h3>
+            </div>
+            <div class="p-5">
+                {% if last_10_loans %}
+                <table id="loansTable" class="min-w-full text-sm divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-green-50 text-gray-600 uppercase text-xs dark:bg-[#2b3548] dark:text-gray-200">
+                        <tr>
+                            <th class="px-6 py-3 text-left"><i class="fas fa-box-open mr-2"></i>Activo</th>
+                            <th class="px-6 py-3 text-left"><i class="fas fa-user mr-2"></i>Usuario</th>
+                            <th class="px-6 py-3 text-left"><i class="fas fa-calendar-alt mr-2"></i>Fecha Préstamo</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200 dark:bg-slate-800 dark:divide-gray-700">
+                        {% for loan in last_10_loans %}
+                        <tr class="hover:bg-green-50 transition-all dark:hover:bg-[#253045]">
+                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">{{ loan.asset.name }}</td>
+                            <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ loan.user.username }}</td>
+                            <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ loan.loan_date|date:"d/m/Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-center text-gray-500 dark:text-gray-400">No hay préstamos recientes.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 🧰 Últimos 10 Mantenimientos -->
+        <div class="rounded-2xl overflow-hidden shadow-md bg-white dark:bg-[#1b2432] border border-green-200 dark:border-gray-700 hover:shadow-lg transition-all">
+            <div class="flex items-center justify-between bg-green-600 text-white px-5 py-3 font-semibold text-lg dark:bg-[#2b3548]">
+                <h3><i class="fas fa-tools mr-2"></i> Últimos 10 Mantenimientos</h3>
+            </div>
+            <div class="p-5">
+                {% if last_10_maintenances %}
+                <table id="maintenancesTable" class="min-w-full text-sm divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-green-50 text-gray-600 uppercase text-xs dark:bg-[#2b3548] dark:text-gray-200">
+                        <tr>
+                            <th class="px-6 py-3 text-left"><i class="fas fa-box-open mr-2"></i>Activo</th>
+                            <th class="px-6 py-3 text-left"><i class="fas fa-check-circle mr-2"></i>Estado</th>
+                            <th class="px-6 py-3 text-left"><i class="fas fa-calendar-alt mr-2"></i>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200 dark:bg-slate-800 dark:divide-gray-700">
+                        {% for maintenance in last_10_maintenances %}
+                        <tr class="hover:bg-green-50 transition-all dark:hover:bg-[#253045]">
+                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">{{ maintenance.asset.name }}</td>
+                            <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ maintenance.status }}</td>
+                            <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ maintenance.created_at|date:"d/m/Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-center text-gray-500 dark:text-gray-400">No hay mantenimientos recientes.</p>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
-
-
-
 {% endblock %}
+
 
 {% block extra_scripts %}
 {{ block.super }}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Data from Django for Event Charts
+    const entityChartData = JSON.parse(document.getElementById('entity_chart_data').textContent);
+    const typeChartData = JSON.parse(document.getElementById('type_chart_data').textContent);
+
     {% if checklist_formset %}
     const addChecklistItemButton = document.getElementById('add-checklist-item');
     if (addChecklistItemButton) {
@@ -292,6 +349,10 @@ document.addEventListener('DOMContentLoaded', function() {
     {% endif %}
     // Asset Status Chart (Doughnut Chart)
     const assetStatusCtx = document.getElementById('assetStatusChart').getContext('2d');
+    const gradient = assetStatusCtx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, '#10B981');
+    gradient.addColorStop(1, '#2563EB');
+
     new Chart(assetStatusCtx, {
         type: 'doughnut',
         data: {
@@ -300,9 +361,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 data: {{ asset_status_data|safe }},
                 backgroundColor: [
                     '#10B981', // primary (Disponible)
-                    '#3B82F6', // status_blue (En uso)
-                    '#F59E0B', // status_yellow (En mantenimiento)
+                    '#2563EB', // new blue (En uso)
+                    '#FBBF24', // new orange (En mantenimiento)
                 ],
+                borderWidth: 2,
+                borderColor: '#fff',
+                hoverBorderColor: '#10B981',
                 hoverOffset: 4
             }]
         },
@@ -329,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function() {
             datasets: [{
                 label: 'Número de Activos',
                 data: {{ asset_category_data|safe }},
-                backgroundColor: '#10B981',
+                backgroundColor: gradient,
             }]
         },
         options: {
@@ -347,6 +411,83 @@ document.addEventListener('DOMContentLoaded', function() {
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1
+                    }
+                }
+            }
+        }
+    });
+
+    // Chart: Events per Entity (Bar Chart)
+    const ctxEntity = document.getElementById('entityChart').getContext('2d');
+    new Chart(ctxEntity, {
+        type: 'bar',
+        data: {
+            labels: entityChartData.labels,
+            datasets: [{
+                label: 'Número de Eventos',
+                data: entityChartData.data,
+                backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#4b5563',
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#4b5563',
+                    }
+                }
+            },
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Chart: Event Type Distribution (Pie Chart)
+    const ctxType = document.getElementById('typeChart').getContext('2d');
+    new Chart(ctxType, {
+        type: 'pie',
+        data: {
+            labels: typeChartData.labels,
+            datasets: [{
+                label: 'Distribución',
+                data: typeChartData.data,
+                backgroundColor: [
+                    'rgba(239, 68, 68, 0.5)',
+                    'rgba(59, 130, 246, 0.5)',
+                    'rgba(245, 158, 11, 0.5)',
+                    'rgba(16, 185, 129, 0.5)',
+                    'rgba(139, 92, 246, 0.5)',
+                ],
+                borderColor: [
+                    'rgba(239, 68, 68, 1)',
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(245, 158, 11, 1)',
+                    'rgba(16, 185, 129, 1)',
+                    'rgba(139, 92, 246, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                       color: document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#4b5563',
                     }
                 }
             }

@@ -1,11 +1,15 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
-from .models import Evento
-from .forms import EventoForm, ChecklistItemFormSet # Importar ChecklistItemFormSet
+from .models import Evento, AttendingEntity
+from .forms import EventoForm, ChecklistItemFormSet, AttendingEntityForm
 from apps.accounts.decorators import groups_required
 
 def calendar_view(request):
-    return render(request, 'events/calendar.html')
+    events_for_table = Evento.objects.all().select_related('responsable', 'attending_entity')
+    context = {
+        'events_for_table': events_for_table,
+    }
+    return render(request, 'events/calendar.html', context)
 
 def eventos_api(request):
     eventos = Evento.objects.exclude(tipo='prestamo')
@@ -90,3 +94,39 @@ def remove_attendee(request, pk):
         evento.current_attendees -= 1
         evento.save()
     return redirect('events:evento_update', pk=pk)
+
+@groups_required(['Admin', 'Staff'])
+def attending_entity_list(request):
+    entities = AttendingEntity.objects.all()
+    return render(request, 'events/attending_entity_list.html', {'entities': entities})
+
+@groups_required(['Admin', 'Staff'])
+def attending_entity_create(request):
+    if request.method == 'POST':
+        form = AttendingEntityForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('events:attending_entity_list')
+    else:
+        form = AttendingEntityForm()
+    return render(request, 'events/attending_entity_form.html', {'form': form})
+
+@groups_required(['Admin', 'Staff'])
+def attending_entity_update(request, pk):
+    entity = get_object_or_404(AttendingEntity, pk=pk)
+    if request.method == 'POST':
+        form = AttendingEntityForm(request.POST, instance=entity)
+        if form.is_valid():
+            form.save()
+            return redirect('events:attending_entity_list')
+    else:
+        form = AttendingEntityForm(instance=entity)
+    return render(request, 'events/attending_entity_form.html', {'form': form})
+
+@groups_required(['Admin'])
+def attending_entity_delete(request, pk):
+    entity = get_object_or_404(AttendingEntity, pk=pk)
+    if request.method == 'POST':
+        entity.delete()
+        return redirect('events:attending_entity_list')
+    return render(request, 'events/attending_entity_confirm_delete.html', {'entity': entity})

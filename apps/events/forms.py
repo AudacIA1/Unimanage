@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Evento, ChecklistItem
+from .models import Evento, ChecklistItem, AttendingEntity
 from apps.assets.models import Asset # Importar el modelo Asset
 from dal import autocomplete # Importar autocomplete
 
@@ -21,6 +21,8 @@ class EventoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['fecha_inicio'].widget.format = '%Y-%m-%dT%H:%M'
+        self.fields['fecha_fin'].widget.format = '%Y-%m-%dT%H:%M'
         # El queryset y el widget ahora se definen directamente en el campo, no es necesario configurarlos aquí
         # self.fields['reserved_assets'].queryset = Asset.objects.filter(status='disponible')
         # self.fields['reserved_assets'].widget = forms.CheckboxSelectMultiple()
@@ -42,3 +44,8 @@ ChecklistItemFormSet = inlineformset_factory(
     extra=1,
     can_delete=True,
 )
+
+class AttendingEntityForm(forms.ModelForm):
+    class Meta:
+        model = AttendingEntity
+        fields = ['name', 'parent']
