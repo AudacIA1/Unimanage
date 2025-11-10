@@ -8,7 +8,12 @@ services:
     name: unimanage
     env: python
     plan: free # You can change this to 'starter' or 'pro' for more resources
-    buildCommand: "pip install -r requirements.txt"
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+      python manage.py makemigrations --noinput
+      python manage.py migrate --noinput
+
     startCommand: "gunicorn core.wsgi:application"
     # Set environment variables for Django
     envVars:
