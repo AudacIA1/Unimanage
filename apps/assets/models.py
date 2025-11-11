@@ -36,6 +36,11 @@ class Asset(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def is_available(self, start=None, end=None):
+        # Primero, verifica el estado general del activo
+        if self.status != 'disponible':
+            return False
+
+        # Si el estado es 'disponible', verifica si hay reservas de eventos que se solapen
         if start is None:
             start = timezone.now()
         if end is None:

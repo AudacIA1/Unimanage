@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto p-6 bg-white dark:bg-[#1b2432] rounded-lg shadow-sm dark:border dark:border-gray-700">
+    <header class="mb-8">
+        <h1 class="text-4xl font-bold text-primary dark:text-primary tracking-tight">{{ title }}</h1>
+        <p class="text-secondary dark:text-secondary mt-1">Muestra la cantidad de activos agrupados por categoría.</p>
+    </header>
+
+    {% if data %}
+    <div class="overflow-x-auto mb-8">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 rounded-lg shadow-md">
+            <thead class="bg-gray-50 dark:bg-[#2b3548]">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Categoría</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cantidad Total</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-[#1b2432] divide-y divide-gray-200 dark:divide-gray-700">
+                {% for row in data %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ row.category__name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ row.total }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="text-gray-600 dark:text-gray-400">No hay datos disponibles.</p>
+    {% endif %}
+</div>
+{% endblock %}

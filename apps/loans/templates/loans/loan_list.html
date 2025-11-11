@@ -115,7 +115,7 @@
                         <td class="px-6 py-4 dark:text-gray-300">{{ p.loan_date|date:"d/m/Y" }}</td>
                         <td class="px-6 py-4 dark:text-gray-300">{{ p.due_date|date:"d/m/Y" }}</td>
                         <td class="px-6 py-4 text-red-500 font-semibold">
-                            {{ p.due_date|timeuntil:timezone.now }}
+                            {{ p.due_date|timeuntil:now }}
                         </td>
                         <td class="px-6 py-4 text-center">
                             {% if is_admin_or_staff %}

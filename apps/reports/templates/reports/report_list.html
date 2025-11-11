@@ -1,16 +1,35 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}Reportes{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto">
+<div class="max-w-7xl mx-auto p-6 bg-white dark:bg-[#1b2432] rounded-lg shadow-sm dark:border dark:border-gray-700">
     <header class="mb-8">
-        <h1 class="text-4xl font-bold text-primary dark:text-primary tracking-tight">Sección de Reportes</h1>
-        <p class="text-secondary dark:text-secondary mt-1">Esta sección está en desarrollo.</p>
+        <h1 class="text-4xl font-bold text-primary dark:text-primary tracking-tight">{{ title }}</h1>
+        <p class="text-secondary dark:text-secondary mt-1">Selecciona el reporte que deseas generar.</p>
     </header>
 
-    <div class="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6">
-        <p class="dark:text-gray-300">Próximamente, aquí podrás encontrar reportes detallados sobre los activos, préstamos y mantenimientos.</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Reporte de Utilización de Activos -->
+        <a href="{% url 'reports:asset_usage_report' %}" class="block p-6 bg-blue-50 dark:bg-[#2b3548] rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out border border-blue-100 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-blue-700 dark:text-blue-400 mb-2">Reporte de Utilización de Activos</h2>
+            <p class="text-gray-600 dark:text-gray-300">Muestra el estado general de los activos (en uso, disponibles, en mantenimiento).</p>
+            <span class="mt-4 inline-block text-blue-600 dark:text-blue-300 hover:underline">Ver Reporte &rarr;</span>
+        </a>
+
+        <!-- Reporte de Activos por Categoría -->
+        <a href="{% url 'reports:asset_by_category_report' %}" class="block p-6 bg-green-50 dark:bg-[#2b3548] rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out border border-green-100 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-green-700 dark:text-green-400 mb-2">Reporte de Activos por Categoría</h2>
+            <p class="text-gray-600 dark:text-gray-300">Muestra la cantidad de activos agrupados por tipo y su valor.</p>
+            <span class="mt-4 inline-block text-green-600 dark:text-green-300 hover:underline">Ver Reporte &rarr;</span>
+        </a>
+
+        <!-- Reporte de Activos por Ubicación -->
+        <a href="{% url 'reports:asset_by_location_report' %}" class="block p-6 bg-purple-50 dark:bg-[#2b3548] rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out border border-purple-100 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-purple-700 dark:text-purple-400 mb-2">Reporte de Activos por Ubicación</h2>
+            <p class="text-gray-600 dark:text-gray-300">Ver cómo están distribuidos los activos en diferentes dependencias o sedes.</p>
+            <span class="mt-4 inline-block text-purple-600 dark:text-purple-300 hover:underline">Ver Reporte &rarr;</span>
+        </a>
     </div>
 </div>
 {% endblock %}

@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Loan
-from django.utils import timezone
+from django.utils import timezone # Import timezone
 from .forms import LoanForm, LoanEditForm
 from apps.accounts.decorators import groups_required
 
@@ -41,6 +41,7 @@ def loan_list(request):
         "returned_loans": returned_loans,
         "loan_statuses": Loan._meta.get_field('status').choices,
         "is_admin_or_staff": is_admin_or_staff,
+        "now": timezone.now(), # Pass timezone.now() to the template context
     }
     return render(request, "loans/loan_list.html", context)
 

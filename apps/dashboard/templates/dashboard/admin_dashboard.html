@@ -99,7 +99,7 @@
                                 <td class="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">{{ loan.asset.name }}</td>
                                 <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ loan.user.username }}</td>
                                 <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ loan.due_date|date:"d/m/Y" }}</td>
-                                <td class="px-6 py-4 text-red-500 font-semibold">{{ loan.due_date|timeuntil:timezone.now }}</td>
+                                <td class="px-6 py-4 text-red-500 font-semibold">{{ loan.due_date|timeuntil:now }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

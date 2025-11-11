@@ -41,9 +41,9 @@ def asset_list(request):
 
     # Calcular métricas para las tarjetas basadas en el queryset filtrado.
     total_assets = activos.count()
-    available_assets = activos.filter(status="Disponible").count()
-    in_use_assets = activos.filter(status="En uso").count()
-    maintenance_assets = activos.filter(status="En mantenimiento").count()
+    available_assets = activos.filter(status="disponible").count()
+    in_use_assets = activos.filter(status="en_uso").count()
+    maintenance_assets = activos.filter(status="mantenimiento").count()
 
     context = {
         "activos": activos,
