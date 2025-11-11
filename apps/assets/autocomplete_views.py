@@ -18,4 +18,16 @@ class AssetAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
     def get_result_label(self, item):
-        return f'{item.name} ({item.category.name} - {item.status})'
+        return f'{item.name} | {item.category.name} | {item.location} | {item.status}'
+
+class AssetAutocompleteAll(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = Asset.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+
+        return qs
+
+    def get_result_label(self, item):
+        return f'{item.name} | {item.category.name} | {item.location} | {item.status}'

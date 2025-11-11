@@ -42,15 +42,19 @@ def maintenance_list(request):
 @groups_required(['Admin', 'Tech'])
 def maintenance_create(request):
     """
-    Crea una nueva tarea de mantenimiento.
-
-    Muestra un formulario para crear una nueva tarea y procesa los datos
-    enviados.
+    Crea una nueva tarea de mantenimiento y actualiza el estado del activo a 'mantenimiento'.
     """
     if request.method == "POST":
         form = MaintenanceForm(request.POST)
         if form.is_valid():
-            form.save()
+            maintenance = form.save(commit=False)
+            
+            # Actualizar el estado del activo a 'mantenimiento'
+            asset = maintenance.asset
+            asset.status = 'mantenimiento'
+            asset.save()
+            
+            maintenance.save()
             return redirect("maintenance_list")
     else:
         form = MaintenanceForm()
@@ -59,31 +63,41 @@ def maintenance_create(request):
 @groups_required(['Admin', 'Tech'])
 def maintenance_edit(request, pk):
     """
-    Edita una tarea de mantenimiento existente.
-
-    Muestra un formulario pre-rellenado para editar una tarea
-    identificada por su clave primaria (pk).
+    Edita una tarea de mantenimiento existente y actualiza el estado del activo si es necesario.
     """
-    mantenimiento = get_object_or_404(Maintenance, pk=pk)
+    maintenance = get_object_or_404(Maintenance, pk=pk)
+    original_status = maintenance.status
+
     if request.method == "POST":
-        form = MaintenanceForm(request.POST, instance=mantenimiento)
+        form = MaintenanceForm(request.POST, instance=maintenance)
         if form.is_valid():
-            form.save()
+            updated_maintenance = form.save(commit=False)
+            
+            # Si el estado de mantenimiento ha cambiado a 'Finalizado'
+            if original_status != 'Finalizado' and updated_maintenance.status == 'Finalizado':
+                asset = updated_maintenance.asset
+                asset.status = 'disponible'
+                asset.save()
+            
+            updated_maintenance.save()
             return redirect("maintenance_list")
     else:
-        form = MaintenanceForm(instance=mantenimiento)
+        form = MaintenanceForm(instance=maintenance)
     return render(request, "maintenance/maintenance_form.html", {"form": form})
 
 @groups_required(['Admin', 'Tech'])
 def maintenance_delete(request, pk):
     """
-    Elimina una tarea de mantenimiento existente.
-
-    Pide confirmación antes de eliminar una tarea identificada por su
-    clave primaria (pk).
+    Elimina una tarea de mantenimiento existente y actualiza el estado del activo si es necesario.
     """
-    mantenimiento = get_object_or_404(Maintenance, pk=pk)
+    maintenance = get_object_or_404(Maintenance, pk=pk)
     if request.method == "POST":
-        mantenimiento.delete()
+        asset = maintenance.asset
+        maintenance.delete()
+        
+        # El activo vuelve a estar disponible
+        asset.status = 'disponible'
+        asset.save()
+        
         return redirect("maintenance_list")
-    return render(request, "maintenance/maintenance_confirm_delete.html", {"mantenimiento": mantenimiento})
+    return render(request, "maintenance/maintenance_confirm_delete.html", {"mantenimiento": maintenance})

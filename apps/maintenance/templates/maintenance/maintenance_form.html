@@ -3,6 +3,10 @@
 
 {% block title %}Formulario de Mantenimiento{% endblock %}
 
+{% block extra_head %}
+    {{ form.media.css }}
+{% endblock %}
+
 {% block content %}
 <div class="max-w-lg mx-auto bg-white dark:bg-slate-800 p-6 rounded shadow">
     <h2 class="text-2xl font-bold mb-4 dark:text-white">{% if object %}Editar{% else %}Registrar{% endif %} Mantenimiento</h2>
@@ -37,4 +41,8 @@
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    {{ form.media.js }}
 {% endblock %}

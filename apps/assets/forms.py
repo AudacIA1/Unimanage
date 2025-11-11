@@ -21,6 +21,11 @@ class AssetForm(forms.ModelForm):
         model = Asset
         fields = ["name", "category", "location", "status"]
 
+    def __init__(self, *args, **kwargs):
+        super(AssetForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.pk and hasattr(self.instance, 'loan_set') and self.instance.loan_set.filter(status='Activo').exists():
+            self.fields['status'].disabled = True
+
 class AssetCategoryForm(forms.ModelForm):
     parent = TreeNodeChoiceField(queryset=AssetCategory.objects.all(),
                                  level_indicator='---',

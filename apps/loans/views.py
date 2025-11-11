@@ -23,6 +23,7 @@ def loan_list(request):
         all_loans = all_loans.filter(status=status_query)
 
     prestamos = all_loans
+    overdue_loans = [loan for loan in prestamos if loan.is_overdue]
 
     # Calcular métricas para las tarjetas.
     total_loans = prestamos.count()
@@ -33,6 +34,7 @@ def loan_list(request):
 
     context = {
         "prestamos": prestamos,
+        "overdue_loans": overdue_loans,
         "status_query": status_query,
         "total_loans": total_loans,
         "active_loans": active_loans,
@@ -45,16 +47,19 @@ def loan_list(request):
 @groups_required(['Admin', 'Staff'])
 def loan_create(request):
     """
-    Crea un nuevo préstamo.
-
-    Muestra un formulario para crear un nuevo préstamo y procesa los datos
-    enviados.
+    Crea un nuevo préstamo y actualiza el estado del activo a 'en_uso'.
     """
     if request.method == "POST":
         form = LoanForm(request.POST)
         if form.is_valid():
             loan = form.save(commit=False)
             loan.status = "Activo"
+            
+            # Actualizar el estado del activo a 'en_uso'
+            asset = loan.asset
+            asset.status = 'en_uso'
+            asset.save()
+            
             loan.save()
             return redirect("loan_list")
     else:
@@ -64,42 +69,64 @@ def loan_create(request):
 @groups_required(['Admin', 'Staff'])
 def loan_edit(request, pk):
     """
-    Edita un préstamo existente.
-
-    Muestra un formulario pre-rellenado para editar un préstamo
-    identificado por su clave primaria (pk).
+    Edita un préstamo existente y actualiza el estado de los activos si es necesario.
     """
-    prestamo = get_object_or_404(Loan, pk=pk)
+    loan = get_object_or_404(Loan, pk=pk)
+    original_asset = loan.asset
+
     if request.method == "POST":
-        form = LoanEditForm(request.POST, instance=prestamo)
+        form = LoanEditForm(request.POST, instance=loan)
         if form.is_valid():
-            form.save()
+            updated_loan = form.save(commit=False)
+
+            # Si el activo ha cambiado
+            if original_asset != updated_loan.asset:
+                # El activo original vuelve a estar disponible
+                original_asset.status = 'disponible'
+                original_asset.save()
+                # El nuevo activo se marca como en uso
+                updated_loan.asset.status = 'en_uso'
+                updated_loan.asset.save()
+            
+            updated_loan.save()
             return redirect("loan_list")
     else:
-        form = LoanEditForm(instance=prestamo)
+        form = LoanEditForm(instance=loan)
     return render(request, "loans/loan_form.html", {"form": form})
 
 @groups_required(['Admin', 'Staff'])
 def loan_return(request, pk):
     """
-    Marca un préstamo como devuelto y actualiza el estado del activo.
+    Marca un préstamo como devuelto y actualiza el estado del activo a 'disponible'.
     """
     loan = get_object_or_404(Loan, pk=pk)
     loan.status = 'Devuelto'
     loan.return_date = timezone.now()
+    
+    # Actualizar el estado del activo a 'disponible'
+    asset = loan.asset
+    asset.status = 'disponible'
+    asset.save()
+    
     loan.save()
     return redirect("loan_list")
 
 @groups_required(['Admin', 'Staff'])
 def loan_delete(request, pk):
     """
-    Elimina un préstamo existente.
-
-    Pide confirmación antes de eliminar un préstamo identificado por su
-    clave primaria (pk).
+    Elimina un préstamo existente y actualiza el estado del activo si es necesario.
     """
-    prestamo = get_object_or_404(Loan, pk=pk)
+    loan = get_object_or_404(Loan, pk=pk)
     if request.method == "POST":
-        prestamo.delete()
+        asset = loan.asset
+        is_active_loan = loan.status == 'Activo'
+
+        loan.delete()
+
+        if is_active_loan:
+            # Si el préstamo estaba activo, el activo vuelve a estar disponible
+            asset.status = 'disponible'
+            asset.save()
+            
         return redirect("loan_list")
-    return render(request, "loans/loan_confirm_delete.html", {"prestamo": prestamo})
+    return render(request, "loans/loan_confirm_delete.html", {"prestamo": loan})

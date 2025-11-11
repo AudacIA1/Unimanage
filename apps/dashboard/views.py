@@ -26,6 +26,9 @@ def dashboard_view(request):
         available_assets = Asset.objects.filter(status="Disponible").count()
         in_use_assets = Asset.objects.filter(status="En uso").count()
         maintenance_assets = Asset.objects.filter(status="En mantenimiento").count()
+        
+        print(f"Dashboard - In Use: {in_use_assets}, Maintenance: {maintenance_assets}")
+        
         total_categories = AssetCategory.objects.count()
 
         # --- 2. Datos de Distribución por Categoría ---
@@ -67,6 +70,10 @@ def dashboard_view(request):
         # Se obtienen los 10 préstamos y mantenimientos más recientes.
         last_10_loans = Loan.objects.select_related('asset', 'user').order_by('-loan_date')[:10]
         last_10_maintenances = Maintenance.objects.select_related('asset').order_by('-created_at')[:10]
+        
+        # --- Préstamos Vencidos ---
+        overdue_loans = [loan for loan in Loan.objects.filter(status='Activo') if loan.is_overdue]
+
 
         # --- 4. Datos para Gráficos ---
         # Se preparan los datos para el gráfico de distribución de estados de activos.
@@ -137,6 +144,7 @@ def dashboard_view(request):
             "total_categories": total_categories,
             "last_10_loans": last_10_loans,
             "last_10_maintenances": last_10_maintenances,
+            "overdue_loans": overdue_loans,
             "asset_status_labels": asset_status_labels,
             "asset_status_data": asset_status_data,
             "asset_category_labels": asset_category_labels,

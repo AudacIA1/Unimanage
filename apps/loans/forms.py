@@ -2,6 +2,7 @@ from django import forms
 from .models import Loan
 from dal import autocomplete
 from apps.assets.models import Asset
+from django.utils import timezone # Import timezone
 
 class LoanForm(forms.ModelForm):
     """
@@ -11,7 +12,7 @@ class LoanForm(forms.ModelForm):
     facilitar la búsqueda de activos disponibles.
     """
     asset = forms.ModelChoiceField(
-        queryset=Asset.objects.all(),
+        queryset=Asset.objects.filter(status='disponible'),
         widget=autocomplete.ModelSelect2(
             url='asset-autocomplete',
             attrs={
@@ -20,12 +21,17 @@ class LoanForm(forms.ModelForm):
             }
         )
     )
+    due_date = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        input_formats=['%Y-%m-%dT%H:%M'],
+        initial=timezone.now() + timezone.timedelta(days=7) # Default to 7 days from now
+    )
 
     class Meta:
         model = Loan
-        fields = ["asset", "user"]
+        fields = ["asset", "user", "due_date"]
 
 class LoanEditForm(forms.ModelForm):
     class Meta:
         model = Loan
-        fields = ["asset", "user", "return_date", "status"]
+        fields = ["asset", "user", "due_date", "return_date", "status"]
