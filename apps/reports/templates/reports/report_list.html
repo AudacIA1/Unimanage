@@ -30,6 +30,13 @@
             <p class="text-gray-600 dark:text-gray-300">Ver cómo están distribuidos los activos en diferentes dependencias o sedes.</p>
             <span class="mt-4 inline-block text-purple-600 dark:text-purple-300 hover:underline">Ver Reporte &rarr;</span>
         </a>
+
+        <!-- Reporte General de Activos (PDF) -->
+        <a href="{% url 'reports:general_assets_report_pdf' %}" class="block p-6 bg-red-50 dark:bg-[#2b3548] rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out border border-red-100 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-red-700 dark:text-red-400 mb-2">Reporte General de Activos (PDF)</h2>
+            <p class="text-gray-600 dark:text-gray-300">Descarga un informe consolidado de activos en formato PDF.</p>
+            <span class="mt-4 inline-block text-red-600 dark:text-red-300 hover:underline">Descargar PDF &rarr;</span>
+        </a>
     </div>
 </div>
 {% endblock %}

@@ -6,4 +6,5 @@ urlpatterns = [
     path('asset-usage/', views.asset_usage_report, name='asset_usage_report'),
     path('asset-category/', views.asset_by_category_report, name='asset_by_category_report'),
     path('asset-location/', views.asset_by_location_report, name='asset_by_location_report'),
+    path('pdf/general/', views.general_assets_report_pdf, name='general_assets_report_pdf'),
 ]
