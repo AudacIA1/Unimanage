@@ -13,7 +13,7 @@ class EventoForm(forms.ModelForm):
 
     class Meta:
         model = Evento
-        fields = ['titulo', 'descripcion', 'tipo', 'fecha_inicio', 'fecha_fin', 'lugar', 'responsable', 'attending_entity', 'max_attendees', 'reserved_assets']
+        fields = ['titulo', 'descripcion', 'tipo', 'fecha_inicio', 'fecha_fin', 'lugar', 'responsable', 'attending_entity', 'reserved_assets']
         widgets = {
             'fecha_inicio': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'fecha_fin': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
@@ -23,6 +23,10 @@ class EventoForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['fecha_inicio'].widget.format = '%Y-%m-%dT%H:%M'
         self.fields['fecha_fin'].widget.format = '%Y-%m-%dT%H:%M'
+
+        if self.instance.pk:
+            self.fields['fecha_inicio'].widget.attrs['readonly'] = True
+            self.fields['fecha_fin'].widget.attrs['readonly'] = True
         # El queryset y el widget ahora se definen directamente en el campo, no es necesario configurarlos aquí
         # self.fields['reserved_assets'].queryset = Asset.objects.filter(status='disponible')
         # self.fields['reserved_assets'].widget = forms.CheckboxSelectMultiple()

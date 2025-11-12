@@ -38,8 +38,6 @@ class Evento(models.Model):
     lugar = models.CharField(max_length=200, blank=True)
     responsable = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     attending_entity = TreeForeignKey(AttendingEntity, on_delete=models.SET_NULL, null=True, blank=True)
-    max_attendees = models.PositiveIntegerField(null=True, blank=True)
-    current_attendees = models.PositiveIntegerField(default=0)
     creado_en = models.DateTimeField(auto_now_add=True)
     reserved_assets = models.ManyToManyField(Asset, blank=True, related_name='events_reserved_for') # Nuevo campo
 

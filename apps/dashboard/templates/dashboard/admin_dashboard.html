@@ -176,7 +176,6 @@
                     <p class="text-sm text-gray-500 mb-4"><i class="fa-regular fa-clock mr-1"></i>{{ nearest_event.fecha_inicio|date:"d/m/Y H:i" }}</p>
                     <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Lugar:</strong> {{ nearest_event.lugar }}</p>
                     <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Responsable:</strong> {{ nearest_event.responsable }}</p>
-                    <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Asistentes:</strong> {{ nearest_event.current_attendees }} / {{ nearest_event.max_attendees|default:"-" }}</p>
                     <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Entidad que asiste:</strong> {{ nearest_event.attending_entity|default:"-" }}</p>
                     <h4 class="text-lg font-semibold text-gray-700 dark:text-white mt-4 mb-2">Checklist</h4>
                     <form method="post">

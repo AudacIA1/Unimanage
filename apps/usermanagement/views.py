@@ -36,13 +36,10 @@ class UserListView(AdminOrSuperuserRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = User.objects.exclude(username='admin').order_by('username')
-        print(f"DEBUG: get_queryset returned: {list(queryset)}") # Debug print
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        print(f"DEBUG: self.object_list in get_context_data: {list(self.object_list)}") # Debug print
 
         users_with_groups = []
         for user in self.object_list:
@@ -51,8 +48,6 @@ class UserListView(AdminOrSuperuserRequiredMixin, ListView):
                 'current_group': user.groups.first()
             })
         
-        print(f"DEBUG: users_with_groups constructed: {users_with_groups}") # Debug print
-
         context['users_with_groups'] = users_with_groups
         context['all_groups'] = Group.objects.all()
         context['title'] = 'Gestionar Usuarios y Roles'
