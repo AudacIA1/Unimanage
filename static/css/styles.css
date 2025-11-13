@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+button:hover {
+    transform: scale(1.05);
+}
+thead {
+    background: linear-gradient(90deg, #10B98120, #3B82F620);
+}
+tbody tr:hover {
+    background-color: rgba(16, 185, 129, 0.05);
+}

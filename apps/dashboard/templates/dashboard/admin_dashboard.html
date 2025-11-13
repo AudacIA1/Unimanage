@@ -6,23 +6,8 @@
 {% block extra_head %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <style>
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        button:hover {
-            transform: scale(1.05);
-        }
-        thead {
-            background: linear-gradient(90deg, #10B98120, #3B82F620);
-        }
-        tbody tr:hover {
-            background-color: rgba(16, 185, 129, 0.05);
-        }
-    </style>
-{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    {% endblock %}
 
 {% block content %}
 {{ entity_chart_data|json_script:"entity_chart_data" }}
@@ -42,7 +27,7 @@
     <div x-data="{ tab: 'resumen' }" class="space-y-6 container mx-auto px-4 mb-16">
         <div class="flex space-x-4 border-b pb-2">
             <button @click="tab='resumen'" :class="tab==='resumen' ? 'text-green-600 font-semibold' : 'text-gray-500'">Resumen</button>
-            <button @click="tab='graficos'" :class="tab==='graficos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Gráficos</button>
+            <button @click="tab='graficos'; $nextTick(() => updateCharts())" :class="tab==='graficos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Gráficos</button>
             <button @click="tab='eventos'" :class="tab==='eventos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Eventos</button>
             <button @click="tab='historial'" :class="tab==='historial' ? 'text-green-600 font-semibold' : 'text-gray-500'">Historial</button>
         </div>
@@ -140,26 +125,54 @@
                           
                         </div>
         <div x-show="tab==='graficos'" class="space-y-8">
-            <!-- Charts Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Distribución de Activos por Estado</h2>
-                    <canvas id="assetStatusChart"></canvas>
-                </div>
-                <div class="p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Activos por Categoría</h2>
-                    <canvas id="assetCategoryChart"></canvas>
-                </div>
-                <!-- Eventos por Entidad -->
-                <div class="p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Eventos por Entidad</h2>
-                    <canvas id="entityChart"></canvas>
-                </div>
-                <!-- Distribución por Tipo de Evento -->
-                <div class="p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4">Distribución por Tipo de Evento</h2>
-                    <canvas id="typeChart"></canvas>
-                </div>
+            <!-- Panel de controles: toggles, guardar, reset -->
+            <div class="mb-6 flex flex-wrap items-center gap-3">
+              <div class="flex items-center gap-2">
+                <button id="saveDashboardBtn" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition">💾 Guardar</button>
+                <button id="resetDashboardBtn" class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">🔄 Reset</button>
+              </div>
+
+              <div class="ml-auto flex items-center gap-4">
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="chart-toggle" data-chart="chartStatus" checked>
+                  <span class="text-sm">Estado</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="chart-toggle" data-chart="chartCategory" checked>
+                  <span class="text-sm">Categoría</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="chart-toggle" data-chart="chartEntity" checked>
+                  <span class="text-sm">Eventos por Entidad</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="chart-toggle" data-chart="chartType" checked>
+                  <span class="text-sm">Tipo de Evento</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Contenedor reordenable de charts -->
+            <div id="chartsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="chartStatus" id="chartStatus">
+                <h3 class="font-semibold mb-4">Distribución de Activos por Estado</h3>
+                <canvas id="assetStatusChart"></canvas>
+              </div>
+
+              <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="chartCategory" id="chartCategory">
+                <h3 class="font-semibold mb-4">Activos por Categoría</h3>
+                <canvas id="assetCategoryChart"></canvas>
+              </div>
+
+              <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="chartEntity" id="chartEntity">
+                <h3 class="font-semibold mb-4">Eventos por Entidad</h3>
+                <canvas id="entityChart"></canvas>
+              </div>
+
+              <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="chartType" id="chartType">
+                <h3 class="font-semibold mb-4">Distribución por Tipo de Evento</h3>
+                <canvas id="typeChart"></canvas>
+              </div>
             </div>
         </div>
 
@@ -354,38 +367,169 @@
 </div>
 {% endblock %}
 
-
 {% block extra_scripts %}
-{{ block.super }}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+    let assetStatusChartInstance;
+    let assetCategoryChartInstance;
+    let entityChartInstance;
+    let typeChartInstance;
+
+    function updateCharts() {
+        if (assetStatusChartInstance) assetStatusChartInstance.update();
+        if (assetCategoryChartInstance) assetCategoryChartInstance.update();
+        if (entityChartInstance) entityChartInstance.update();
+        if (typeChartInstance) typeChartInstance.update();
+    }
+
     // Data from Django for Event Charts
     const entityChartData = JSON.parse(document.getElementById('entity_chart_data').textContent);
     const typeChartData = JSON.parse(document.getElementById('type_chart_data').textContent);
 
-    {% if checklist_formset %}
-    const addChecklistItemButton = document.getElementById('add-checklist-item');
-    if (addChecklistItemButton) {
-      const checklistContainer = document.getElementById('checklist-formset-container');
-      const emptyFormTemplate = document.getElementById('checklist-empty-form').innerHTML;
-      const totalFormsInput = document.querySelector('#id_checklist-TOTAL_FORMS');
-      let formNum = {{ checklist_formset.total_form_count }};
+  const STORAGE_KEY = 'dashboard_preferences_v1'; // cambia versión si actualizas esquema
+  const chartsContainer = document.getElementById('chartsContainer');
+  const toggles = document.querySelectorAll('.chart-toggle');
+  const saveBtn = document.getElementById('saveDashboardBtn');
+  const resetBtn = document.getElementById('resetDashboardBtn');
 
-      addChecklistItemButton.addEventListener('click', function() {
-        let newForm = emptyFormTemplate.replace(/__prefix__/g, formNum);
-        checklistContainer.insertAdjacentHTML('beforeend', newForm);
-        totalFormsInput.value = parseInt(totalFormsInput.value) + 1;
-        formNum++;
+  // Inicializar Sortable (drag & drop)
+  const sortable = Sortable.create(chartsContainer, {
+    handle: '.chart-card', // el usuario puede arrastrar por cualquier parte de la tarjeta
+    animation: 150,
+    onEnd: saveToLocalStorageDebounced // guardar orden cuando termine de arrastrar
+  });
+
+  // ---- Helpers ----
+  function getCurrentState() {
+    // estado = { order: [...ids], visible: {id: true/false} }
+    const order = Array.from(chartsContainer.querySelectorAll('.chart-card')).map(c => c.dataset.id);
+    const visible = {};
+    order.forEach(id => {
+      const el = document.getElementById(id);
+      visible[id] = !el.classList.contains('hidden'); // usamos class hidden para ocultar
+    });
+    return { order, visible };
+  }
+
+  function applyState(state) {
+    // 1) Orden: reordenar DOM según state.order
+    if (state.order && Array.isArray(state.order)) {
+      state.order.forEach(id => {
+        const el = document.querySelector(`[data-id="${id}"]`);
+        if (el) chartsContainer.appendChild(el);
       });
     }
-    {% endif %}
+
+    // 2) Visibilidad: mostrar/ocultar y actualizar checkboxes
+    document.querySelectorAll('.chart-card').forEach(card => {
+      const id = card.dataset.id;
+      const shouldShow = state.visible ? !!state.visible[id] : true;
+      setChartVisibility(id, shouldShow, /*animate=*/true);
+      // actualizar checkbox correspondiente
+      const cb = document.querySelector(`.chart-toggle[data-chart="${id}"]`);
+      if (cb) cb.checked = shouldShow;
+    });
+  }
+
+  function setChartVisibility(id, show, animate = true) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (show) {
+      el.classList.remove('hidden', 'opacity-0', 'scale-95');
+      if (animate) {
+        // fuerza reflow para que la transición funcione
+        void el.offsetWidth;
+        el.classList.remove('translate-y-2');
+      }
+    } else {
+      if (animate) {
+        el.classList.add('opacity-0', 'scale-95');
+        setTimeout(() => el.classList.add('hidden'), 250); // coincide con transition duration
+      } else {
+        el.classList.add('hidden');
+      }
+    }
+  }
+
+  // ---- Local storage ----
+  function saveToLocalStorage() {
+    const state = getCurrentState();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  // Debounced save to avoid many writes during dragging
+  let saveTimeout = null;
+  function saveToLocalStorageDebounced() {
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => {
+      saveToLocalStorage();
+    }, 250);
+  }
+
+  function loadFromLocalStorage() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn('dashboard: prefs parse error', e);
+      return null;
+    }
+  }
+
+  function resetToDefaults() {
+    // default: show all, original order = initial DOM order
+    document.querySelectorAll('.chart-card').forEach(card => {
+      setChartVisibility(card.dataset.id, true, false);
+    });
+    // optionally restore default order: no action if you want original HTML order
+    // remove stored prefs
+    localStorage.removeItem(STORAGE_KEY);
+    // reload page to reflect order (optional)
+    window.location.reload();
+  }
+
+  // ---- Event handlers: toggles ----
+  toggles.forEach(cb => {
+    cb.addEventListener('change', (e) => {
+      const id = cb.dataset.chart;
+      setChartVisibility(id, cb.checked, true);
+      saveToLocalStorageDebounced();
+    });
+  });
+
+  // Save button -> also optionally send to server
+  saveBtn.addEventListener('click', () => {
+    saveToLocalStorage();
+    // Opcional: enviar al servidor (ver sección servidor más abajo)
+    // saveToServer();
+    showToast('Preferencias guardadas localmente');
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if (!confirm('Restablecer el tablero a la configuración por defecto?')) return;
+    resetToDefaults();
+  });
+
+  // Small toast for UX
+  function showToast(msg) {
+    const t = document.createElement('div');
+    t.innerText = msg;
+    t.className = 'fixed bottom-6 right-6 bg-black/80 text-white px-4 py-2 rounded shadow-lg';
+    document.body.appendChild(t);
+    setTimeout(() => {
+      t.classList.add('opacity-0');
+      setTimeout(() => t.remove(), 400);
+    }, 1400);
+  }
+
     // Asset Status Chart (Doughnut Chart)
     const assetStatusCtx = document.getElementById('assetStatusChart').getContext('2d');
     const gradient = assetStatusCtx.createLinearGradient(0, 0, 0, 400);
     gradient.addColorStop(0, '#10B981');
     gradient.addColorStop(1, '#2563EB');
 
-    new Chart(assetStatusCtx, {
+    assetStatusChartInstance = new Chart(assetStatusCtx, {
         type: 'doughnut',
         data: {
             labels: {{ asset_status_labels|safe }},
@@ -397,7 +541,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     '#FBBF24', // new orange (En mantenimiento)
                 ],
                 borderWidth: 2,
-                borderColor: '#fff',
+                borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
                 hoverBorderColor: '#10B981',
                 hoverOffset: 4
             }]
@@ -408,6 +552,9 @@ document.addEventListener('DOMContentLoaded', function() {
             plugins: {
                 legend: {
                     position: 'top',
+                    labels: {
+                        color: document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#4b5563',
+                    }
                 },
                 title: {
                     display: false,
@@ -418,7 +565,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Assets by Category Chart (Bar Chart)
     const assetCategoryCtx = document.getElementById('assetCategoryChart').getContext('2d');
-    new Chart(assetCategoryCtx, {
+    assetCategoryChartInstance = new Chart(assetCategoryCtx, {
         type: 'bar',
         data: {
             labels: {{ asset_category_labels|safe }},
@@ -426,6 +573,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 label: 'Número de Activos',
                 data: {{ asset_category_data|safe }},
                 backgroundColor: gradient,
+                borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
             }]
         },
         options: {
@@ -442,7 +590,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 y: {
                     beginAtZero: true,
                     ticks: {
+                        color: document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#4b5563',
                         stepSize: 1
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#4b5563',
                     }
                 }
             }
@@ -451,15 +605,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Chart: Events per Entity (Bar Chart)
     const ctxEntity = document.getElementById('entityChart').getContext('2d');
-    new Chart(ctxEntity, {
+    entityChartInstance = new Chart(ctxEntity, {
         type: 'bar',
         data: {
             labels: entityChartData.labels,
             datasets: [{
                 label: 'Número de Eventos',
                 data: entityChartData.data,
-                backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                borderColor: 'rgba(59, 130, 246, 1)',
+                backgroundColor: document.documentElement.classList.contains('dark') ? 'rgba(59, 130, 246, 0.7)' : 'rgba(59, 130, 246, 0.5)',
+                borderColor: document.documentElement.classList.contains('dark') ? 'rgba(59, 130, 246, 1)' : 'rgba(59, 130, 246, 1)',
                 borderWidth: 1
             }]
         },
@@ -489,7 +643,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Chart: Event Type Distribution (Pie Chart)
     const ctxType = document.getElementById('typeChart').getContext('2d');
-    new Chart(ctxType, {
+    typeChartInstance = new Chart(ctxType, {
         type: 'pie',
         data: {
             labels: typeChartData.labels,
@@ -497,18 +651,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 label: 'Distribución',
                 data: typeChartData.data,
                 backgroundColor: [
-                    'rgba(239, 68, 68, 0.5)',
-                    'rgba(59, 130, 246, 0.5)',
-                    'rgba(245, 158, 11, 0.5)',
-                    'rgba(16, 185, 129, 0.5)',
-                    'rgba(139, 92, 246, 0.5)',
+                    document.documentElement.classList.contains('dark') ? 'rgba(239, 68, 68, 0.7)' : 'rgba(239, 68, 68, 0.5)',
+                    document.documentElement.classList.contains('dark') ? 'rgba(59, 130, 246, 0.7)' : 'rgba(59, 130, 246, 0.5)',
+                    document.documentElement.classList.contains('dark') ? 'rgba(245, 158, 11, 0.7)' : 'rgba(245, 158, 11, 0.5)',
+                    document.documentElement.classList.contains('dark') ? 'rgba(16, 185, 129, 0.7)' : 'rgba(16, 185, 129, 0.5)',
+                    document.documentElement.classList.contains('dark') ? 'rgba(139, 92, 246, 0.7)' : 'rgba(139, 92, 246, 0.5)',
                 ],
                 borderColor: [
-                    'rgba(239, 68, 68, 1)',
-                    'rgba(59, 130, 246, 1)',
-                    'rgba(245, 158, 11, 1)',
-                    'rgba(16, 185, 129, 1)',
-                    'rgba(139, 92, 246, 1)',
+                    document.documentElement.classList.contains('dark') ? 'rgba(239, 68, 68, 1)' : 'rgba(239, 68, 68, 1)',
+                    document.documentElement.classList.contains('dark') ? 'rgba(59, 130, 246, 1)' : 'rgba(59, 130, 246, 1)',
+                    document.documentElement.classList.contains('dark') ? 'rgba(245, 158, 11, 1)' : 'rgba(245, 158, 11, 1)',
+                    document.documentElement.classList.contains('dark') ? 'rgba(16, 185, 129, 1)' : 'rgba(16, 185, 129, 1)',
+                    document.documentElement.classList.contains('dark') ? 'rgba(139, 92, 246, 1)' : 'rgba(139, 92, 246, 1)',
                 ],
                 borderWidth: 1
             }]
@@ -525,6 +679,48 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+  // ---- Initialize: apply saved state if exists ----
+  const saved = loadFromLocalStorage();
+  if (saved) {
+    applyState(saved);
+  } else {
+    // no prefs -> ensure all visible and in default order
+    document.querySelectorAll('.chart-toggle').forEach(cb => cb.checked = true);
+  }
+
+  // Optional: Save automatically on unload (helps preserve order after drag)
+  window.addEventListener('beforeunload', saveToLocalStorage);
+
+  // ---- Optional: function to save to server (AJAX, needs endpoint) ----
+  async function saveToServer() {
+    // Solo si usuario autenticado y quieres persistencia por usuario
+    const state = getCurrentState();
+    try {
+      const csrftoken = getCookie('csrftoken');
+      const res = await fetch('/api/dashboard/preferences/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify(state)
+      });
+      if (!res.ok) throw new Error('Network response was not ok');
+      showToast('Preferencias guardadas en el servidor');
+    } catch (err) {
+      console.error('saveToServer error', err);
+      showToast('Error guardando en servidor');
+    }
+  }
+
+  // small helper to get cookie CSRF
+  function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    if (match) return decodeURIComponent(match[2]);
+    return null;
+  }
+
 });
 </script>
 {% endblock %}

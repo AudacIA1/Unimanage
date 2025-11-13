@@ -40,6 +40,8 @@ class Evento(models.Model):
     attending_entity = TreeForeignKey(AttendingEntity, on_delete=models.SET_NULL, null=True, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
     reserved_assets = models.ManyToManyField(Asset, blank=True, related_name='events_reserved_for') # Nuevo campo
+    max_attendees = models.IntegerField(null=True, blank=True)
+    current_attendees = models.IntegerField(default=0, null=True, blank=True)
 
     class Meta:
         ordering = ['-fecha_inicio']

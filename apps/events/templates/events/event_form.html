@@ -60,10 +60,17 @@
       {% if form.attending_entity.errors %}<p class="text-red-500 text-xs italic">{{ form.attending_entity.errors }}</p>{% endif %}
     </div>
 
-    <div>
-      <label for="{{ form.max_attendees.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Máximo de Asistentes</label>
-      {{ form.max_attendees|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
-      {% if form.max_attendees.errors %}<p class="text-red-500 text-xs italic">{{ form.max_attendees.errors }}</p>{% endif %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label for="{{ form.current_attendees.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Asistentes Actuales</label>
+        {{ form.current_attendees|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+        {% if form.current_attendees.errors %}<p class="text-red-500 text-xs italic">{{ form.current_attendees.errors }}</p>{% endif %}
+      </div>
+      <div>
+        <label for="{{ form.max_attendees.id_for_label }}" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad de Asistentes</label>
+        {{ form.max_attendees|add_class:"mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 dark:bg-slate-700 dark:border-slate-600 dark:text-white" }}
+        {% if form.max_attendees.errors %}<p class="text-red-500 text-xs italic">{{ form.max_attendees.errors }}</p>{% endif %}
+      </div>
     </div>
 
     <div class="mt-6">
@@ -133,17 +140,6 @@
       <a href="{% url 'events:evento_delete' evento.pk %}" class="mt-8 px-6 py-3 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition duration-200">Eliminar Evento</a>
     {% endif %}
   </form>
-
-  {% if evento %}
-  <div class="mt-8">
-    <h3 class="text-lg font-semibold mb-3 text-gray-800 dark:text-white">Asistentes</h3>
-    <div class="flex items-center">
-      <a href="{% url 'events:remove_attendee' evento.pk %}" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600">-</a>
-      <span class="mx-4 text-lg">{{ evento.current_attendees }} / {{ evento.max_attendees|default:"∞" }}</span>
-      <a href="{% url 'events:add_attendee' evento.pk %}" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">+</a>
-    </div>
-  </div>
-  {% endif %}
 </div>
 {% endblock %} {# Close the content block here #}
 

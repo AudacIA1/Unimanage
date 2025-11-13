@@ -8,7 +8,14 @@
         <h1 class="text-4xl font-bold text-primary dark:text-primary tracking-tight">{{ title }}</h1>
         <p class="text-secondary dark:text-secondary mt-1">Selecciona el reporte que deseas generar.</p>
     </header>
-
+<div x-data="{ tab: 'resumen' }" class="space-y-6 container mx-auto px-4 mb-16">
+         <div class="flex space-x-4 border-b pb-2">
+            <button @click="tab='activos'" :class="tab==='activos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Activos</button>
+            <button @click="tab='prestamos'" :class="tab==='prestamos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Prestamos</button>
+            <button @click="tab='mantenimientos'" :class="tab==='Manetenimientos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Mantenimientos</button>
+            <button @click="tab='eventos'" :class="tab==='Eventos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Eventos</button>
+        </div>
+<div x-show="tab==='activos'" class="space-y-8">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Reporte de Utilización de Activos -->
         <a href="{% url 'reports:asset_usage_report' %}" class="block p-6 bg-blue-50 dark:bg-[#2b3548] rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out border border-blue-100 dark:border-gray-700">
@@ -38,5 +45,9 @@
             <span class="mt-4 inline-block text-red-600 dark:text-red-300 hover:underline">Descargar PDF &rarr;</span>
         </a>
     </div>
+    </div>
 </div>
+    </div>
+</div>
+
 {% endblock %}

@@ -1,0 +1,28 @@
+/* Estilos para DataTables modo oscuro */
+.dark .dataTables_wrapper .dataTables_length,
+.dark .dataTables_wrapper .dataTables_filter,
+.dark .dataTables_wrapper .dataTables_info,
+.dark .dataTables_wrapper .dataTables_processing,
+.dark .dataTables_wrapper .dataTables_paginate .paginate_button {
+    color: #e2e8f0 !important;
+}
+.dark .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+    color: #94a3b8 !important;
+}
+.dark .dataTables_wrapper .dataTables_length select {
+    background-color: #475569;
+    color: #e2e8f0;
+}
+.dark .dataTables_wrapper .dataTables_filter input {
+    background-color: #475569;
+    color: #e2e8f0;
+}
+.dark table.dataTable tbody tr {
+    background-color: #334155;
+}
+.dark table.dataTable tbody tr:hover {
+    background-color: #475569 !important;
+}
+.dark table.dataTable thead th {
+    color: #f1f5f9;
+}

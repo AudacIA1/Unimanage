@@ -79,21 +79,6 @@ def evento_delete(request, pk):
     messages.success(request, f"El evento '{evento.titulo}' ha sido eliminado.")
     return redirect('events:calendar_view')
 
-@groups_required(['Administrador'])
-def add_attendee(request, pk):
-    evento = get_object_or_404(Evento, pk=pk)
-    if evento.max_attendees is None or evento.current_attendees < evento.max_attendees:
-        evento.current_attendees += 1
-        evento.save()
-    return redirect('events:evento_update', pk=pk)
-
-@groups_required(['Administrador'])
-def remove_attendee(request, pk):
-    evento = get_object_or_404(Evento, pk=pk)
-    if evento.current_attendees > 0:
-        evento.current_attendees -= 1
-        evento.save()
-    return redirect('events:evento_update', pk=pk)
 
 @groups_required(['Admin', 'Staff'])
 def attending_entity_list(request):

@@ -102,6 +102,9 @@
     <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
+    <link rel="stylesheet" href="{% static 'css/datatables-dark.css' %}">
     {% block extra_head %}{% endblock %}
 </head>
 <body x-data="{ open: false }" class="flex min-h-screen bg-gray-100 dark:bg-gray-900">

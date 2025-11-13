@@ -9,6 +9,7 @@ from apps.events.forms import EventoForm, ChecklistItemForm
 from django.forms import inlineformset_factory
 from django.utils import timezone # Import timezone
 from django.db.models import Sum, Case, When, IntegerField, Count
+from django.db.models.functions import TruncMonth
 from apps.request.models import LoanRequest
 
 @login_required
@@ -102,6 +103,17 @@ def dashboard_view(request):
         tipo_display_map = dict(Evento.TIPO_CHOICES)
         type_chart_data = {'labels': [tipo_display_map.get(item['tipo'], item['tipo']) for item in event_types], 'data': [item['count'] for item in event_types]}
 
+        # --- New: Total Visits Over Time ---
+        visits_over_time = Evento.objects.annotate(month=TruncMonth('fecha_inicio')) \
+                                        .values('month') \
+                                        .annotate(total_visits=Count('id')) \
+                                        .order_by('month')
+        
+        visits_labels = [item['month'].strftime('%b %Y') for item in visits_over_time]
+        visits_data = [item['total_visits'] for item in visits_over_time]
+        total_visits_over_time_data = {'labels': visits_labels, 'data': visits_data}
+
+
         context = {
             "data_by_category": data_by_category, "total_assets": total_assets, "available_assets": available_assets,
             "in_use_assets": in_use_assets, "maintenance_assets": maintenance_assets, "total_categories": total_categories,
@@ -111,6 +123,7 @@ def dashboard_view(request):
             "nearest_event": nearest_event, "checklist_formset": checklist_formset,
             "other_upcoming_events": other_upcoming_events, "recent_requests": recent_requests,
             "entity_stats": entity_stats, "entity_chart_data": entity_chart_data, "type_chart_data": type_chart_data,
+            "total_visits_over_time_data": total_visits_over_time_data, # Add new data to context
             "now": timezone.now(), # Pass timezone.now() to the template context
         }
         return render(request, "dashboard/admin_dashboard.html", context)
