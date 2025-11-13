@@ -3,6 +3,16 @@ from apps.assets.models import Asset, AssetCategory # Import AssetCategory
 from .forms import AssetUsageFilterForm
 from django.db.models import Count, Sum # Sum is still needed for potential future use or other models
 from apps.accounts.decorators import group_required, groups_required # For permissions
+from apps.loans.models import Loan
+from django.utils.dateparse import parse_date
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+from datetime import datetime
 
 @group_required('Admin') # Restrict to Admin for now
 def asset_usage_report(request):
@@ -69,14 +79,58 @@ def asset_by_location_report(request):
 
 @group_required('Admin') # Restrict to Admin for now
 def report_list(request):
-    return render(request, 'reports/report_list.html', {'title': 'Lista de Reportes'})
+    # Filtros desde el frontend
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
 
-from django.http import HttpResponse
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from reportlab.lib.units import inch
-from reportlab.lib import colors
-from datetime import datetime
+    loans = Loan.objects.all()
+
+    if start_date and end_date:
+        loans = loans.filter(loan_date__range=[start_date, end_date])
+
+    # Conteo por estado
+    status_summary = list(loans.values('status').annotate(total=Count('id')))
+
+    # Conteo por usuario
+    user_summary = list(loans.values('user__username').annotate(total=Count('id')))
+
+    context = {
+        'title': 'Lista de Reportes',
+        'status_summary': json.dumps(status_summary, cls=DjangoJSONEncoder),
+        'user_summary': json.dumps(user_summary, cls=DjangoJSONEncoder),
+        'start_date': start_date,
+        'end_date': end_date,
+    }
+    return render(request, 'reports/report_list.html', context)
+
+def loan_report_pdf(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    loans = Loan.objects.all()
+    if start_date and end_date:
+        loans = loans.filter(loan_date__range=[start_date, end_date])
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="loan_report.pdf"'
+
+    p = canvas.Canvas(response, pagesize=letter)
+    p.setTitle("Reporte de Préstamos")
+
+    p.drawString(200, 750, "Reporte de Préstamos")
+    p.drawString(100, 730, f"Periodo: {start_date or '-'} a {end_date or '-'}")
+
+    y = 700
+    for loan in loans:
+        p.drawString(100, y, f"{loan.id} - {loan.asset.name} - {loan.user.username} - {loan.status}")
+        y -= 20
+        if y < 100:
+            p.showPage()
+            y = 750
+
+    p.showPage()
+    p.save()
+    return response
 
 @group_required('Admin') # Restrict to Admin for now
 def general_assets_report_pdf(request):

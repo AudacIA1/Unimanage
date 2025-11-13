@@ -8,14 +8,14 @@
         <h1 class="text-4xl font-bold text-primary dark:text-primary tracking-tight">{{ title }}</h1>
         <p class="text-secondary dark:text-secondary mt-1">Selecciona el reporte que deseas generar.</p>
     </header>
-<div x-data="{ tab: 'resumen' }" class="space-y-6 container mx-auto px-4 mb-16">
+<div x-data="{ tab: 'prestamos' }" class="space-y-6 container mx-auto px-4 mb-16">
          <div class="flex space-x-4 border-b pb-2">
             <button @click="tab='activos'" :class="tab==='activos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Activos</button>
             <button @click="tab='prestamos'" :class="tab==='prestamos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Prestamos</button>
             <button @click="tab='mantenimientos'" :class="tab==='Manetenimientos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Mantenimientos</button>
             <button @click="tab='eventos'" :class="tab==='Eventos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Eventos</button>
         </div>
-<div x-show="tab==='activos'" class="space-y-8">
+<div :class="{ 'hidden': tab !== 'activos' }" class="space-y-8">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <!-- Reporte de Utilización de Activos -->
         <a href="{% url 'reports:asset_usage_report' %}" class="block p-6 bg-blue-50 dark:bg-[#2b3548] rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out border border-blue-100 dark:border-gray-700">
@@ -45,6 +45,56 @@
             <span class="mt-4 inline-block text-red-600 dark:text-red-300 hover:underline">Descargar PDF &rarr;</span>
         </a>
     </div>
+</div>
+<div :class="{ 'hidden': tab !== 'prestamos' }" class="space-y-8">
+    <div class="p-6">
+      <h2 class="text-2xl font-bold mb-4">📊 Reporte de Préstamos</h2>
+
+      <form method="GET" class="mb-4 flex space-x-4">
+        <input type="date" name="start_date" value="{% if start_date %}{{ start_date }}{% endif %}" class="border p-2 rounded">
+        <input type="date" name="end_date" value="{% if end_date %}{{ end_date }}{% endif %}" class="border p-2 rounded">
+        <button class="bg-blue-600 text-white px-4 py-2 rounded">Filtrar</button>
+        <a href="{% url 'reports:loan_report_pdf' %}?start_date={{ start_date|default_if_none:'' }}&end_date={{ end_date|default_if_none:'' }}" 
+           class="bg-red-600 text-white px-4 py-2 rounded">📄 Exportar PDF</a>
+      </form>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-white shadow-md rounded p-4">
+          <h3 class="font-semibold mb-2">Estado de Préstamos</h3>
+          <canvas id="loanStatusChart"></canvas>
+        </div>
+
+        <div class="bg-white shadow-md rounded p-4">
+          <h3 class="font-semibold mb-2">Préstamos por Usuario</h3>
+          <canvas id="loanUserChart"></canvas>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script>
+        const statusData = {{ status_summary|safe }};
+        const userData = {{ user_summary|safe }};
+
+        if (statusData.length > 0) {
+            new Chart(document.getElementById('loanStatusChart'), {
+              type: 'pie',
+              data: {
+                labels: statusData.map(d => d.status),
+                datasets: [{ data: statusData.map(d => d.total) }]
+              }
+            });
+        }
+
+        if (userData.length > 0) {
+            new Chart(document.getElementById('loanUserChart'), {
+              type: 'bar',
+              data: {
+                labels: userData.map(d => d.user__username),
+                datasets: [{ data: userData.map(d => d.total) }]
+              }
+            });
+        }
+      </script>
     </div>
 </div>
     </div>
