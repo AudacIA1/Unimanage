@@ -48,14 +48,14 @@
 </div>
 <div :class="{ 'hidden': tab !== 'prestamos' }" class="space-y-8">
     <div class="p-6">
-      <h2 class="text-2xl font-bold mb-4">📊 Reporte de Préstamos</h2>
+      <h2 class="text-2xl font-bold mb-4">Reporte de Préstamos</h2>
 
       <form method="GET" class="mb-4 flex space-x-4">
         <input type="date" name="start_date" value="{% if start_date %}{{ start_date }}{% endif %}" class="border p-2 rounded">
         <input type="date" name="end_date" value="{% if end_date %}{{ end_date }}{% endif %}" class="border p-2 rounded">
         <button class="bg-blue-600 text-white px-4 py-2 rounded">Filtrar</button>
         <a href="{% url 'reports:loan_report_pdf' %}?start_date={{ start_date|default_if_none:'' }}&end_date={{ end_date|default_if_none:'' }}" 
-           class="bg-red-600 text-white px-4 py-2 rounded">📄 Exportar PDF</a>
+           class="bg-red-600 text-white px-4 py-2 rounded">Exportar PDF</a>
       </form>
 
       <div class="grid grid-cols-2 gap-4">

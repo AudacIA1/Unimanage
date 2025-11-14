@@ -113,6 +113,11 @@ def dashboard_view(request):
         visits_data = [item['total_visits'] for item in visits_over_time]
         total_visits_over_time_data = {'labels': visits_labels, 'data': visits_data}
 
+        # --- 5. Datos para Gráficos de Préstamos ---
+        loans = Loan.objects.all()
+        status_summary = list(loans.values('status').annotate(total=Count('id')))
+        user_summary = list(loans.values('user__username').annotate(total=Count('id')))
+
 
         context = {
             "data_by_category": data_by_category, "total_assets": total_assets, "available_assets": available_assets,
@@ -124,6 +129,8 @@ def dashboard_view(request):
             "other_upcoming_events": other_upcoming_events, "recent_requests": recent_requests,
             "entity_stats": entity_stats, "entity_chart_data": entity_chart_data, "type_chart_data": type_chart_data,
             "total_visits_over_time_data": total_visits_over_time_data, # Add new data to context
+            "status_summary": status_summary,
+            "user_summary": user_summary,
             "now": timezone.now(), # Pass timezone.now() to the template context
         }
         return render(request, "dashboard/admin_dashboard.html", context)

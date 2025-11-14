@@ -12,6 +12,8 @@
 {% block content %}
 {{ entity_chart_data|json_script:"entity_chart_data" }}
 {{ type_chart_data|json_script:"type_chart_data" }}
+{{ status_summary|json_script:"status_summary_data" }}
+{{ user_summary|json_script:"user_summary_data" }}
 
 <div class="p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700">
     <div class="flex items-center justify-between mb-8">
@@ -128,8 +130,8 @@
             <!-- Panel de controles: toggles, guardar, reset -->
             <div class="mb-6 flex flex-wrap items-center gap-3">
               <div class="flex items-center gap-2">
-                <button id="saveDashboardBtn" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition">💾 Guardar</button>
-                <button id="resetDashboardBtn" class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">🔄 Reset</button>
+                <button id="saveDashboardBtn" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition">Guardar</button>
+                <button id="resetDashboardBtn" class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">Reiniciar</button>
               </div>
 
               <div class="ml-auto flex items-center gap-4">
@@ -148,6 +150,14 @@
                 <label class="flex items-center gap-2">
                   <input type="checkbox" class="chart-toggle" data-chart="chartType" checked>
                   <span class="text-sm">Tipo de Evento</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="chart-toggle" data-chart="loanStatusChart" checked>
+                  <span class="text-sm">Estado de Préstamos</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" class="chart-toggle" data-chart="loanUserChart" checked>
+                  <span class="text-sm">Préstamos por Usuario</span>
                 </label>
               </div>
             </div>
@@ -172,6 +182,16 @@
               <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="chartType" id="chartType">
                 <h3 class="font-semibold mb-4">Distribución por Tipo de Evento</h3>
                 <canvas id="typeChart"></canvas>
+              </div>
+
+              <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="loanStatusChart" id="loanStatusChart">
+                <h3 class="font-semibold mb-4">Estado de Préstamos</h3>
+                <canvas id="loanStatusCanvas"></canvas>
+              </div>
+
+              <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="loanUserChart" id="loanUserChart">
+                <h3 class="font-semibold mb-4">Préstamos por Usuario</h3>
+                <canvas id="loanUserCanvas"></canvas>
               </div>
             </div>
         </div>
@@ -374,17 +394,23 @@ document.addEventListener('DOMContentLoaded', function () {
     let assetCategoryChartInstance;
     let entityChartInstance;
     let typeChartInstance;
+    let loanStatusChartInstance;
+    let loanUserChartInstance;
 
     function updateCharts() {
         if (assetStatusChartInstance) assetStatusChartInstance.update();
         if (assetCategoryChartInstance) assetCategoryChartInstance.update();
         if (entityChartInstance) entityChartInstance.update();
         if (typeChartInstance) typeChartInstance.update();
+        if (loanStatusChartInstance) loanStatusChartInstance.update();
+        if (loanUserChartInstance) loanUserChartInstance.update();
     }
 
     // Data from Django for Event Charts
     const entityChartData = JSON.parse(document.getElementById('entity_chart_data').textContent);
     const typeChartData = JSON.parse(document.getElementById('type_chart_data').textContent);
+    const statusSummaryData = JSON.parse(document.getElementById('status_summary_data').textContent);
+    const userSummaryData = JSON.parse(document.getElementById('user_summary_data').textContent);
 
   const STORAGE_KEY = 'dashboard_preferences_v1'; // cambia versión si actualizas esquema
   const chartsContainer = document.getElementById('chartsContainer');
@@ -679,6 +705,30 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
+
+    // Chart: Loan Status (Pie Chart)
+    if (statusSummaryData.length > 0) {
+        const loanStatusCtx = document.getElementById('loanStatusCanvas').getContext('2d');
+        loanStatusChartInstance = new Chart(loanStatusCtx, {
+          type: 'pie',
+          data: {
+            labels: statusSummaryData.map(d => d.status),
+            datasets: [{ data: statusSummaryData.map(d => d.total) }]
+          }
+        });
+    }
+
+    // Chart: Loans by User (Bar Chart)
+    if (userSummaryData.length > 0) {
+        const loanUserCtx = document.getElementById('loanUserCanvas').getContext('2d');
+        loanUserChartInstance = new Chart(loanUserCtx, {
+          type: 'bar',
+          data: {
+            labels: userSummaryData.map(d => d.user__username),
+            datasets: [{ data: userSummaryData.map(d => d.total) }]
+          }
+        });
+    }
 
   // ---- Initialize: apply saved state if exists ----
   const saved = loadFromLocalStorage();
