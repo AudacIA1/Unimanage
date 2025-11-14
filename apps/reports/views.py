@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from apps.assets.models import Asset, AssetCategory # Import AssetCategory
 from .forms import AssetUsageFilterForm
-from django.db.models import Count, Sum # Sum is still needed for potential future use or other models
+from django.db.models import Sum, Count, Avg # Sum is still needed for potential future use or other models
 from apps.accounts.decorators import group_required, groups_required # For permissions
 from apps.loans.models import Loan
 from django.utils.dateparse import parse_date
@@ -13,6 +13,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 from datetime import datetime
+from apps.maintenance.models import Maintenance
 
 @group_required('Admin') # Restrict to Admin for now
 def asset_usage_report(request):
@@ -235,4 +236,159 @@ def general_assets_report_pdf(request):
     pdf.drawString(50, 50, f"Reporte generado automáticamente - {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
     pdf.save()
 
+    return response
+
+def maintenance_report_view(request):
+    # Filtros
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    technician = request.GET.get('technician')
+    status = request.GET.get('status')
+    maintenances = Maintenance.objects.all()
+    if start_date and end_date:
+        maintenances = maintenances.filter(scheduled_date__range=[start_date, end_date])
+    if technician:
+        maintenances = maintenances.filter(technician__username=technician)
+    if status:
+        maintenances = maintenances.filter(status=status)
+    # Resumen
+    total_count = maintenances.count()
+    status_summary = maintenances.values('status').annotate(total=Count('id'))
+    technician_summary = maintenances.values('technician__username').annotate(total=Count('id'))
+    context = {
+        'maintenances': maintenances,
+        'total_count': total_count,
+        'status_summary': status_summary,
+        'technician_summary': technician_summary,
+        'filters': {
+            'start_date': start_date,
+            'end_date': end_date,
+            'technician': technician,
+            'status': status,
+        }
+    }
+    return render(request, 'reports/maintenance_report.html', context)
+
+def maintenance_report_pdf(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    technician = request.GET.get('technician')
+    status = request.GET.get('status')
+
+    maintenances = Maintenance.objects.all()
+    if start_date and end_date:
+        maintenances = maintenances.filter(scheduled_date__range=[start_date, end_date])
+    if technician:
+        maintenances = maintenances.filter(technician__username=technician)
+    if status:
+        maintenances = maintenances.filter(status=status)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="maintenance_report.pdf"'
+
+    p = canvas.Canvas(response, pagesize=letter)
+    p.setTitle("Reporte de Mantenimiento")
+
+    p.drawString(200, 750, "Reporte de Mantenimiento")
+    p.drawString(100, 730, f"Periodo: {start_date or '-'} a {end_date or '-'}")
+
+    y = 700
+    for m in maintenances:
+        p.drawString(100, y, f"Activo: {m.asset.name} - Técnico: {m.technician.username if m.technician else 'N/A'} - Estado: {m.get_status_display()}")
+        y -= 20
+        if y < 100:
+            p.showPage()
+            y = 750
+
+    p.showPage()
+    p.save()
+    return response
+
+from apps.events.models import Evento as Event
+import io
+from django.http import FileResponse
+
+def events_general_report(request):
+    events = Event.objects.all().order_by('-fecha_inicio')
+    return render(request, 'reports/events_general.html', {
+        'title': 'Reporte General de Eventos',
+        'events': events
+    })
+
+def events_by_date(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    events = Event.objects.all()
+    if start_date and end_date:
+        events = events.filter(fecha_inicio__range=[start_date, end_date])
+    return render(request, 'reports/events_by_date.html', {
+        'title': 'Reporte de Eventos por Fecha',
+        'events': events,
+        'filters': {
+            'start_date': start_date,
+            'end_date': end_date,
+        }
+    })
+
+def events_by_user_pdf(request):
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    p.drawString(40, 750, "Reporte de Eventos por Usuario")
+    events = Event.objects.values('responsable__username').annotate(total=Count('id'))
+    y = 700
+    for item in events:
+        p.drawString(40, y, f"{item['responsable__username']}: {item['total']} eventos")
+        y -= 20
+    p.save()
+    buffer.seek(0)
+    return FileResponse(buffer, as_attachment=True, filename="eventos_usuario.pdf")
+
+def events_general_report_pdf(request):
+    events = Event.objects.all().order_by('-fecha_inicio')
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="events_general_report.pdf"'
+
+    p = canvas.Canvas(response, pagesize=letter)
+    p.setTitle("Reporte General de Eventos")
+
+    p.drawString(200, 750, "Reporte General de Eventos")
+
+    y = 700
+    for event in events:
+        p.drawString(100, y, f"{event.titulo} - {event.responsable.username} - {event.fecha_inicio}")
+        y -= 20
+        if y < 100:
+            p.showPage()
+            y = 750
+    
+    p.showPage()
+    p.save()
+    return response
+
+def events_by_date_pdf(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    events = Event.objects.all()
+    if start_date and end_date:
+        events = events.filter(fecha_inicio__range=[start_date, end_date])
+    
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="events_by_date_report.pdf"'
+
+    p = canvas.Canvas(response, pagesize=letter)
+    p.setTitle("Reporte de Eventos por Fecha")
+
+    p.drawString(200, 750, "Reporte de Eventos por Fecha")
+    p.drawString(100, 730, f"Periodo: {start_date or '-'} a {end_date or '-'}")
+
+    y = 700
+    for event in events:
+        p.drawString(100, y, f"{event.titulo} - {event.responsable.username} - {event.fecha_inicio}")
+        y -= 20
+        if y < 100:
+            p.showPage()
+            y = 750
+            
+    p.showPage()
+    p.save()
     return response

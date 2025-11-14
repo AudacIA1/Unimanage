@@ -1,6 +1,7 @@
 from django.db import models
 from apps.assets.models import Asset
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 class Maintenance(models.Model):
     """
@@ -9,19 +10,20 @@ class Maintenance(models.Model):
     Registra el activo que requiere mantenimiento, una descripción del
     trabajo, quién lo realiza, el estado de la tarea y cuándo se creó.
     """
+    STATUS_CHOICES = [
+        ('pending', 'Pendiente'),
+        ('in_progress', 'En progreso'),
+        ('completed', 'Completado'),
+    ]
     asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
-    description = models.TextField()
-    performed_by = models.CharField(max_length=100)
-    status = models.CharField(
-        max_length=20,
-        choices=[
-            ("Pendiente", "Pendiente"),
-            ("En proceso", "En proceso"),
-            ("Finalizado", "Finalizado"),
-        ],
-    )
+    technician = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    description = models.TextField(blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    scheduled_date = models.DateField(null=True, blank=True)
+    completed_date = models.DateField(null=True, blank=True)
+    performed_by = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(default=timezone.now) 
 
     def __str__(self):
         """Devuelve una representación en string del mantenimiento."""
-        return f"{self.asset.name} - {self.status} ({self.created_at.date()})"
+        return f"{self.asset.name} - {self.get_status_display()} ({self.created_at.date()})"

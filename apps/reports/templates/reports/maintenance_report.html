@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="p-6">
+  <h2 class="text-2xl font-bold mb-4">🛠️ Reporte de Mantenimiento</h2>
+  <form method="GET" class="mb-4 flex flex-wrap gap-3">
+    <input type="date" name="start_date" value="{{ filters.start_date }}" class="border p-2 rounded">
+    <input type="date" name="end_date" value="{{ filters.end_date }}" class="border p-2 rounded">
+    <select name="status" class="border p-2 rounded">
+      <option value="">Estado</option>
+      <option value="pending">Pendiente</option>
+      <option value="in_progress">En progreso</option>
+      <option value="completed">Completado</option>
+    </select>
+    <button class="bg-blue-600 text-white px-4 py-2 rounded">Filtrar</button>
+    <a href="{% url 'reports:maintenance_report' %}" class="bg-gray-500 text-white px-4 py-2 rounded">Limpiar</a>
+    <a href="{% url 'reports:maintenance_report_pdf' %}?start_date={{ filters.start_date|default_if_none:'' }}&end_date={{ filters.end_date|default_if_none:'' }}&technician={{ filters.technician|default_if_none:'' }}&status={{ filters.status|default_if_none:'' }}" class="bg-red-600 text-white px-4 py-2 rounded">Exportar PDF</a>
+  </form>
+
+  <div class="grid grid-cols-1 md:grid-cols-1 gap-4 mb-6">
+    <div class="bg-white p-4 rounded-lg shadow">
+      <h3 class="text-lg font-bold">Total de Mantenimientos</h3>
+      <p class="text-2xl">{{ total_count }}</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+    <div class="bg-white p-4 rounded-lg shadow">
+      <h3 class="text-lg font-bold">Resumen por Estado</h3>
+      <ul>
+        {% for item in status_summary %}
+          <li>{{ item.get_status_display }} - {{ item.total }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="bg-white p-4 rounded-lg shadow">
+      <h3 class="text-lg font-bold">Resumen por Técnico</h3>
+      <ul>
+        {% for item in technician_summary %}
+          <li>{{ item.technician__username }} - {{ item.total }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="bg-white p-4 rounded-lg shadow">
+    <h3 class="text-lg font-bold mb-4">Detalle de Mantenimientos</h3>
+    <table class="w-full">
+      <thead>
+        <tr>
+          <th class="text-left">Activo</th>
+          <th class="text-left">Técnico</th>
+          <th class="text-left">Estado</th>
+          <th class="text-left">Fecha Programada</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in maintenances %}
+          <tr>
+            <td>{{ m.asset.name }}</td>
+            <td>{{ m.technician.username|default:"N/A" }}</td>
+            <td>{{ m.get_status_display }}</td>
+            <td>{{ m.scheduled_date }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

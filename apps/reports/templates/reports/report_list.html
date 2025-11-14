@@ -12,8 +12,8 @@
          <div class="flex space-x-4 border-b pb-2">
             <button @click="tab='activos'" :class="tab==='activos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Activos</button>
             <button @click="tab='prestamos'" :class="tab==='prestamos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Prestamos</button>
-            <button @click="tab='mantenimientos'" :class="tab==='Manetenimientos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Mantenimientos</button>
-            <button @click="tab='eventos'" :class="tab==='Eventos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Eventos</button>
+            <button @click="tab='mantenimientos'" :class="tab==='mantenimientos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Mantenimientos</button>
+            <button @click="tab='eventos'" :class="tab==='eventos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Eventos</button>
         </div>
 <div :class="{ 'hidden': tab !== 'activos' }" class="space-y-8">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -58,17 +58,6 @@
            class="bg-red-600 text-white px-4 py-2 rounded">Exportar PDF</a>
       </form>
 
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-white shadow-md rounded p-4">
-          <h3 class="font-semibold mb-2">Estado de Préstamos</h3>
-          <canvas id="loanStatusChart"></canvas>
-        </div>
-
-        <div class="bg-white shadow-md rounded p-4">
-          <h3 class="font-semibold mb-2">Préstamos por Usuario</h3>
-          <canvas id="loanUserChart"></canvas>
-        </div>
-      </div>
 
       <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
       <script>
@@ -95,6 +84,40 @@
             });
         }
       </script>
+    </div>
+</div>
+<div :class="{ 'hidden': tab !== 'mantenimientos' }" class="space-y-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Reporte de Mantenimiento -->
+        <a href="{% url 'reports:maintenance_report' %}" class="block p-6 bg-yellow-50 dark:bg-[#2b3548] rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out border border-yellow-100 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-yellow-700 dark:text-yellow-400 mb-2">Reporte de Mantenimiento</h2>
+            <p class="text-gray-600 dark:text-gray-300">Muestra el estado de los mantenimientos, costos y técnicos.</p>
+            <span class="mt-4 inline-block text-yellow-600 dark:text-yellow-300 hover:underline">Ver Reporte &rarr;</span>
+        </a>
+    </div>
+</div>
+<div :class="{ 'hidden': tab !== 'eventos' }" class="space-y-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Reporte General de Eventos -->
+        <a href="{% url 'reports:events_general_report' %}" class="block p-6 bg-indigo-50 dark:bg-[#2b3548] rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out border border-indigo-100 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-indigo-700 dark:text-indigo-400 mb-2">Reporte General de Eventos</h2>
+            <p class="text-gray-600 dark:text-gray-300">Muestra un listado de todos los eventos.</p>
+            <span class="mt-4 inline-block text-indigo-600 dark:text-indigo-300 hover:underline">Ver Reporte &rarr;</span>
+        </a>
+
+        <!-- Reporte de Eventos por Fecha -->
+        <a href="{% url 'reports:events_by_date' %}" class="block p-6 bg-pink-50 dark:bg-[#2b3548] rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out border border-pink-100 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-pink-700 dark:text-pink-400 mb-2">Reporte de Eventos por Fecha</h2>
+            <p class="text-gray-600 dark:text-gray-300">Filtra eventos por un rango de fechas.</p>
+            <span class="mt-4 inline-block text-pink-600 dark:text-pink-300 hover:underline">Ver Reporte &rarr;</span>
+        </a>
+
+        <!-- Reporte de Eventos por Usuario (PDF) -->
+        <a href="{% url 'reports:events_by_user_pdf' %}" class="block p-6 bg-orange-50 dark:bg-[#2b3548] rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out border border-orange-100 dark:border-gray-700">
+            <h2 class="text-xl font-semibold text-orange-700 dark:text-orange-400 mb-2">Reporte de Eventos por Usuario (PDF)</h2>
+            <p class="text-gray-600 dark:text-gray-300">Genera un PDF con los eventos creados o gestionados por cada usuario.</p>
+            <span class="mt-4 inline-block text-orange-600 dark:text-orange-300 hover:underline">Descargar PDF &rarr;</span>
+        </a>
     </div>
 </div>
     </div>
