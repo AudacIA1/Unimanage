@@ -78,33 +78,37 @@
       });
     </script>
 
-    <!-- Tailwind config + CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              primary: '#10B981',
-              secondary: '#6EE7B7',
-              accent: '#FBBF24',
-              dark: '#047857',
-              status_blue: '#3B82F6',
-              status_yellow: '#F59E0B',
-            }
-          }
-        }
-      }
-    </script>
-
-
     <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
     <link rel="stylesheet" href="{% static 'css/datatables-dark.css' %}">
+    <style>
+        .dark .fc .fc-daygrid-day-frame {
+            background-color: #334155 !important; /* slate-700 */
+            border-color: #475569 !important; /* slate-600 */
+        }
+        .dark .fc .fc-col-header-cell {
+            background-color: #1e293b !important; /* slate-800 */
+            color: #f1f5f9 !important; /* slate-100 */
+        }
+        .dark .fc .fc-button {
+            background-color: #475569 !important; /* slate-600 */
+            color: #f1f5f9 !important; /* slate-100 */
+            border-color: #475569 !important; /* slate-600 */
+        }
+        .dark .fc .fc-toolbar-title {
+            color: #f1f5f9 !important; /* slate-100 */
+        }
+        .dark .fc-daygrid-day-number {
+            color: #f1f5f9 !important; /* slate-100 */
+        }
+        .dark .fc-event {
+            color: #f1f5f9 !important; /* slate-100 */
+        }
+    </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body x-data="{ open: false }" class="flex min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -164,7 +168,7 @@
             {% if user.is_authenticated %}
                 <form action="{% url 'logout' %}" method="post" class="inline">
                     {% csrf_token %}
-                    <button type="submit" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200 w-full text-left">
+                    <button type="submit" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-whitehover:text-primary dark:hover:text-primary transition-all duration-200 w-full text-left">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                         </svg>
@@ -172,13 +176,13 @@
                     </button>
                 </form>
             {% else %}
-                <a href="{% url 'login' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200 mb-2">
+                <a href="{% url 'login' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-whitehover:text-primary dark:hover:text-primary transition-all duration-200 mb-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                     </svg>
                     <span>Iniciar Sesión</span>
                 </a>
-                <a href="{% url 'register' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-white hover:text-primary dark:hover:text-primary transition-all duration-200">
+                <a href="{% url 'register' %}" class="flex items-center space-x-3 p-3 rounded-lg text-white hover:bg-whitehover:text-primary dark:hover:text-primary transition-all duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.5 21.75c-2.673 0-5.18-.992-7.004-2.617z" />
                     </svg>
@@ -196,6 +200,51 @@
     {% block content %}{% endblock %}
   </main>
 
+<!-- Chatbot Container -->
+<div id="chatbot-container">
+    <!-- Chatbot Bubble -->
+    <div id="chatbot-bubble">
+        <i class="fas fa-cog"></i>
+    </div>
+
+    <!-- Chatbot Window -->
+    <div id="chatbot-window" class="hidden">
+        <div id="chatbot-header">
+            <span>Chatbot UniManage</span>
+            <button id="chatbot-close-btn">&times;</button>
+        </div>
+        <div id="chatbot-messages">
+            <!-- Messages will be appended here -->
+        </div>
+        <div id="chatbot-input-container">
+            <form id="chatbot-form">
+                <input type="text" id="chatbot-input" placeholder="Escribe tu mensaje...">
+                <button type="submit"><i class="fas fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
+</div>
+
     {% block extra_scripts %}{% endblock %}
+    <!-- Tailwind config + CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#10B981',
+              secondary: '#6EE7B7',
+              accent: '#FBBF24',
+              dark: '#047857',
+              status_blue: '#3B82F6',
+              status_yellow: '#F59E0B',
+            }
+          }
+        }
+      }
+    </script>
+    <script src="{% static 'js/chatbot.js' %}"></script>
 </body>
 </html>

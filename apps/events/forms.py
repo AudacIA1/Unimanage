@@ -13,7 +13,7 @@ class EventoForm(forms.ModelForm):
 
     class Meta:
         model = Evento
-        fields = ['titulo', 'descripcion', 'tipo', 'fecha_inicio', 'fecha_fin', 'lugar', 'responsable', 'attending_entity', 'reserved_assets', 'max_attendees', 'current_attendees']
+        fields = ['titulo', 'descripcion', 'tipo', 'fecha_inicio', 'fecha_fin', 'lugar', 'responsable', 'attending_entity', 'reserved_assets', 'max_attendees']
         widgets = {
             'fecha_inicio': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'fecha_fin': forms.DateTimeInput(attrs={'type': 'datetime-local'}),

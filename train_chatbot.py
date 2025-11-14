@@ -2,7 +2,7 @@
 import spacy
 import random
 from spacy.training.example import Example
-from chatbot.training_data import TRAIN_DATA
+from apps.chatbot.training_data import TRAIN_DATA
 import pathlib
 
 def train_spacy_model(data, iterations=20, model_output_dir='chatbot_model'):

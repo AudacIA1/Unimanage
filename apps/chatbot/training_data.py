@@ -48,28 +48,50 @@ TRAIN_DATA = [
     create_training_example("buenos dias", "saludo"),
     create_training_example("buenas tardes", "saludo"),
     create_training_example("hey", "saludo"),
+    create_training_example("que tal", "saludo"),
+    create_training_example("saludos", "saludo"),
+    create_training_example("hola chatbot", "saludo"),
 
     # --- Intención: Despedirse ---
     create_training_example("adios", "despedida"),
     create_training_example("hasta luego", "despedida"),
     create_training_example("chao", "despedida"),
+    create_training_example("nos vemos", "despedida"),
+    create_training_example("me voy", "despedida"),
+    create_training_example("gracias, adios", "despedida"),
 
     # --- Intención: Listar activos disponibles ---
     create_training_example("muéstrame los activos disponibles", "listar_activos_disponibles"),
     create_training_example("qué equipos están libres", "listar_activos_disponibles"),
     create_training_example("ver los activos que se pueden usar", "listar_activos_disponibles"),
     create_training_example("dame la lista de recursos disponibles", "listar_activos_disponibles"),
+    create_training_example("qué activos están libres ahora", "listar_activos_disponibles"),
+    create_training_example("activos que puedo usar", "listar_activos_disponibles"),
+    create_training_example("dame la lista de activos disponibles", "listar_activos_disponibles"),
+    create_training_example("mostrar activos libres", "listar_activos_disponibles"),
+    create_training_example("qué hay disponible", "listar_activos_disponibles"),
 
     # --- Intención: Contar activos por estado ---
     create_training_example("cuántos activos hay en mantenimiento", "contar_activos_por_estado"),
     create_training_example("dame el número de equipos en uso", "contar_activos_por_estado"),
     create_training_example("cantidad de activos disponibles", "contar_activos_por_estado"),
     create_training_example("cuántos están en mantenimiento", "contar_activos_por_estado"),
+    create_training_example("cuántos activos hay en estado de uso", "contar_activos_por_estado"),
+    create_training_example("dime cuántos equipos están disponibles", "contar_activos_por_estado"),
+    create_training_example("número de activos en mantenimiento", "contar_activos_por_estado"),
+    create_training_example("cuántos activos están en uso", "contar_activos_por_estado"),
+    create_training_example("activos disponibles, cuántos son", "contar_activos_por_estado"),
+    create_training_example("cuántos en uso", "contar_activos_por_estado"),
+    create_training_example("dime la cantidad de activos en estado disponible", "contar_activos_por_estado"),
 
     # --- Intención: Obtener el préstamo más reciente ---
     create_training_example("cuál es el préstamo más reciente", "get_most_recent_loan"),
     create_training_example("dame el último préstamo", "get_most_recent_loan"),
     create_training_example("ver el préstamo más nuevo", "get_most_recent_loan"),
+    create_training_example("último préstamo", "get_most_recent_loan"),
+    create_training_example("quién pidió el último activo", "get_most_recent_loan"),
+    create_training_example("dime el último activo prestado", "get_most_recent_loan"),
+    create_training_example("préstamo reciente", "get_most_recent_loan"),
 
     # --- Intención: Reportar un problema ---
     create_training_example("quiero reportar un problema", "reportar_problema"),
@@ -77,6 +99,11 @@ TRAIN_DATA = [
     create_training_example("la laptop está rota", "reportar_problema"),
     create_training_example("el proyector tiene un fallo", "reportar_problema"),
     create_training_example("necesito ayuda con un activo", "reportar_problema"),
+    create_training_example("tengo un problema con un activo", "reportar_problema"),
+    create_training_example("necesito reportar una falla", "reportar_problema"),
+    create_training_example("hay un equipo dañado", "reportar_problema"),
+    create_training_example("el activo X no funciona", "reportar_problema"),
+    create_training_example("reportar falla", "reportar_problema"),
 
     # --- Intención: Afirmación ---
     create_training_example("sí", "afirmacion"),
@@ -85,6 +112,8 @@ TRAIN_DATA = [
     create_training_example("confirmo", "afirmacion"),
     create_training_example("acepto", "afirmacion"),
     create_training_example("dale", "afirmacion"),
+    create_training_example("afirmativo", "afirmacion"),
+    create_training_example("ok", "afirmacion"),
 
     # --- Intención: Negación ---
     create_training_example("no", "negacion"),
@@ -92,6 +121,8 @@ TRAIN_DATA = [
     create_training_example("no, gracias", "negacion"),
     create_training_example("para", "negacion"),
     create_training_example("cancelar", "negacion"),
+    create_training_example("negativo", "negacion"),
+    create_training_example("no quiero", "negacion"),
 
     # --- Intención: Listar capacidades ---
     create_training_example("qué puedes hacer", "listar_capacidades"),
@@ -99,4 +130,8 @@ TRAIN_DATA = [
     create_training_example("cuáles son tus funciones", "listar_capacidades"),
     create_training_example("ayuda", "listar_capacidades"),
     create_training_example("qué sabes hacer", "listar_capacidades"),
+    create_training_example("dime tus funciones", "listar_capacidades"),
+    create_training_example("qué funcionalidades tienes", "listar_capacidades"),
+    create_training_example("comandos", "listar_capacidades"),
+    create_training_example("opciones", "listar_capacidades"),
 ]

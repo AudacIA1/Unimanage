@@ -113,6 +113,16 @@ def dashboard_view(request):
         visits_data = [item['total_visits'] for item in visits_over_time]
         total_visits_over_time_data = {'labels': visits_labels, 'data': visits_data}
 
+        # --- New: Events per month chart ---
+        events_per_month = Evento.objects.annotate(month=TruncMonth('fecha_inicio')) \
+                                          .values('month') \
+                                          .annotate(count=Count('id')) \
+                                          .order_by('month')
+
+        events_per_month_labels = [item['month'].strftime('%b %Y') for item in events_per_month]
+        events_per_month_data = [item['count'] for item in events_per_month]
+        events_per_month_chart_data = {'labels': events_per_month_labels, 'data': events_per_month_data}
+
         # --- 5. Datos para Gráficos de Préstamos ---
         loans = Loan.objects.all()
         status_summary = list(loans.values('status').annotate(total=Count('id')))
@@ -129,6 +139,7 @@ def dashboard_view(request):
             "other_upcoming_events": other_upcoming_events, "recent_requests": recent_requests,
             "entity_stats": entity_stats, "entity_chart_data": entity_chart_data, "type_chart_data": type_chart_data,
             "total_visits_over_time_data": total_visits_over_time_data, # Add new data to context
+            "events_per_month_chart_data": events_per_month_chart_data,
             "status_summary": status_summary,
             "user_summary": user_summary,
             "now": timezone.now(), # Pass timezone.now() to the template context
