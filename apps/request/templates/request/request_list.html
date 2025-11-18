@@ -4,24 +4,24 @@
 {% block title %}Solicitudes de préstamo{% endblock %}
 
 {% block content %}
-<div class="p-6 text-gray-100 min-h-screen bg-[#0f1623]">
+<div class="text-gray-900 dark:text-gray-100">
   {% in_group user "Administrador" as is_admin %}
   
   <div class="max-w-7xl mx-auto">
     {% if is_admin %}
-      <h1 class="text-3xl font-bold mb-2 text-white">Solicitudes por Aprobar</h1>
-      <p class="text-sm text-gray-400 mb-6">Vista del administrador</p>
+      <h1 class="text-3xl font-bold mb-2 text-gray-900 dark:text-white">Solicitudes por Aprobar</h1>
+      <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Vista del administrador</p>
     {% else %}
       <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-white">Mis Solicitudes</h1>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Mis Solicitudes</h1>
         <button id="open-modal-button" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">+ Nueva solicitud</button>
       </div>
     {% endif %}
 
     <!-- Tabla de solicitudes -->
-    <div class="overflow-x-auto rounded-2xl shadow-lg bg-[#1b2432] border border-gray-700">
+    <div class="overflow-x-auto rounded-2xl shadow-lg bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700">
       <table class="min-w-full text-sm">
-        <thead class="bg-[#2b3548] text-gray-200 uppercase text-xs">
+        <thead class="bg-gray-50 dark:bg-slate-700 text-gray-600 dark:text-gray-300 uppercase text-xs">
           <tr>
             <th class="p-3 text-left">Activo</th>
             <th class="p-3 text-left">Usuario</th>
@@ -33,16 +33,16 @@
         </thead>
         <tbody>
           {% for r in requests %}
-          <tr class="border-t border-gray-700 hover:bg-[#253045] transition">
+          <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition">
             <td class="p-3">{{ r.asset.name }}</td>
             <td class="p-3">{{ r.user.username }}</td>
             <td class="p-3">
               {% if r.status == "approved" %}
-                <span class="text-green-400 font-semibold">Aprobada</span>
+                <span class="text-green-600 dark:text-green-400 font-semibold">Aprobada</span>
               {% elif r.status == "rejected" %}
-                <span class="text-red-400 font-semibold">Rechazada</span>
+                <span class="text-red-600 dark:text-red-400 font-semibold">Rechazada</span>
               {% else %}
-                <span class="text-yellow-400 font-semibold">Pendiente</span>
+                <span class="text-yellow-600 dark:text-yellow-400 font-semibold">Pendiente</span>
               {% endif %}
             </td>
             <td class="p-3">{{ r.start_date|date:"d/m/Y" }}</td>
@@ -50,16 +50,16 @@
             <td class="p-3 space-x-2">
               {% if is_admin %}
                 {% if r.status == 'pending' %}
-                  <a href="{% url 'request:request_approve' r.id %}" class="text-green-500 hover:text-green-400 font-semibold">Aprobar</a>
-                  <a href="{% url 'request:request_reject' r.id %}" class="text-yellow-500 hover:text-yellow-400 font-semibold">Rechazar</a>
+                  <a href="{% url 'request:request_approve' r.id %}" class="text-green-600 hover:text-green-500 dark:text-green-500 dark:hover:text-green-400 font-semibold">Aprobar</a>
+                  <a href="{% url 'request:request_reject' r.id %}" class="text-yellow-600 hover:text-yellow-500 dark:text-yellow-500 dark:hover:text-yellow-400 font-semibold">Rechazar</a>
                 {% endif %}
-                <a href="{% url 'request:request_delete' r.id %}" class="text-red-500 hover:text-red-400 font-semibold">Borrar</a>
+                <a href="{% url 'request:request_delete' r.id %}" class="text-red-600 hover:text-red-500 dark:text-red-500 dark:hover:text-red-400 font-semibold">Borrar</a>
               {% endif %}
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="6" class="p-4 text-center text-gray-400">No hay solicitudes registradas.</td>
+            <td colspan="6" class="p-4 text-center text-gray-500 dark:text-gray-400">No hay solicitudes registradas.</td>
           </tr>
           {% endfor %}
         </tbody>

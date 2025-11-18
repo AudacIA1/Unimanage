@@ -11,6 +11,8 @@ from django.utils import timezone # Import timezone
 from django.db.models import Sum, Case, When, IntegerField, Count
 from django.db.models.functions import TruncMonth
 from apps.request.models import LoanRequest
+import csv
+from django.http import HttpResponse
 
 @login_required
 def dashboard_view(request):
@@ -168,3 +170,30 @@ def dashboard_view(request):
             'user_requests': user_requests,
         }
         return render(request, "dashboard/user_dashboard.html", context)
+
+@login_required
+def export_report(request):
+    user = request.user
+    is_admin = user.groups.filter(name='Admin').exists()
+    is_staff = user.groups.filter(name='Staff').exists()
+
+    if not is_admin and not is_staff:
+        return HttpResponse("Unauthorized", status=401)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="reporte_prestamos_vencidos.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Activo', 'Usuario', 'Fecha de Vencimiento', 'Días de Retraso'])
+
+    overdue_loans = Loan.objects.filter(status='Activo', due_date__lt=timezone.now())
+
+    for loan in overdue_loans:
+        writer.writerow([
+            loan.asset.name,
+            loan.user.username,
+            loan.due_date.strftime('%d/%m/%Y'),
+            (timezone.now().date() - loan.due_date.date()).days
+        ])
+
+    return response
