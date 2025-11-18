@@ -7,6 +7,7 @@
     <input type="date" name="end_date" value="{% if filters.end_date %}{{ filters.end_date }}{% endif %}" class="border p-2 rounded">
     <button class="bg-blue-600 text-white px-4 py-2 rounded">Filtrar</button>
     <a href="{% url 'reports:events_by_date_pdf' %}?start_date={{ filters.start_date|default_if_none:'' }}&end_date={{ filters.end_date|default_if_none:'' }}" class="bg-red-600 text-white px-4 py-2 rounded">Exportar PDF</a>
+<a href="{% url 'reports:events_by_date_excel' %}?start_date={{ filters.start_date|default_if_none:'' }}&end_date={{ filters.end_date|default_if_none:'' }}" class="bg-green-600 text-white px-4 py-2 rounded">Exportar Excel</a>
 </form>
 
 <table class="w-full border">

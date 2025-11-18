@@ -60,3 +60,4 @@ whitenoise==6.11.0
 wrapt==1.17.3
 Faker==25.2.0
 reportlab==4.1.0
+openpyxl==3.1.2

@@ -14,6 +14,8 @@ from reportlab.lib.units import inch
 from reportlab.lib import colors
 from datetime import datetime
 from apps.maintenance.models import Maintenance
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment
 
 @group_required('Admin') # Restrict to Admin for now
 def asset_usage_report(request):
@@ -330,18 +332,7 @@ def events_by_date(request):
         }
     })
 
-def events_by_user_pdf(request):
-    buffer = io.BytesIO()
-    p = canvas.Canvas(buffer, pagesize=letter)
-    p.drawString(40, 750, "Reporte de Eventos por Usuario")
-    events = Event.objects.values('responsable__username').annotate(total=Count('id'))
-    y = 700
-    for item in events:
-        p.drawString(40, y, f"{item['responsable__username']}: {item['total']} eventos")
-        y -= 20
-    p.save()
-    buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename="eventos_usuario.pdf")
+
 
 def events_general_report_pdf(request):
     events = Event.objects.all().order_by('-fecha_inicio')
@@ -391,4 +382,237 @@ def events_by_date_pdf(request):
             
     p.showPage()
     p.save()
+    return response
+
+@group_required('Admin')
+def general_assets_report_excel(request):
+    # Data queries (same as PDF view)
+    estado_data = Asset.objects.values('status').annotate(total=Count('id'))
+    categoria_data = (Asset.objects
+                      .values('category__name')
+                      .annotate(total=Count('id'))
+                      .order_by('category__name'))
+    ubicacion_data = (Asset.objects
+                      .values('location')
+                      .annotate(total=Count('id'))
+                      .order_by('location'))
+
+    # Create Excel workbook
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="reporte_general_activos.xlsx"'
+
+    wb = Workbook()
+    
+    # --- Sheet 1: Resumen por Estado ---
+    ws1 = wb.active
+    ws1.title = "Resumen por Estado"
+
+    ws1.append(['Estado', 'Cantidad', 'Porcentaje (%)'])
+    total_activos = sum([e['total'] for e in estado_data]) or 1
+    for row in ws1.iter_rows(min_row=1, max_row=1, min_col=1, max_col=3):
+        for cell in row:
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal='center')
+
+    for e in estado_data:
+        porcentaje = (e['total'] / total_activos) * 100
+        ws1.append([
+            dict(Asset.STATUS_CHOICES).get(e['status'], e['status']).capitalize(),
+            e['total'],
+            f"{porcentaje:.1f}%"
+        ])
+
+    # --- Sheet 2: Distribución por Categoría ---
+    ws2 = wb.create_sheet(title="Distribución por Categoría")
+    ws2.append(['Categoría', 'Cantidad'])
+    for row in ws2.iter_rows(min_row=1, max_row=1, min_col=1, max_col=2):
+        for cell in row:
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal='center')
+
+    for c in categoria_data:
+        ws2.append([
+            c['category__name'] or "Sin categoría",
+            c['total']
+        ])
+
+    # --- Sheet 3: Distribución por Ubicación ---
+    ws3 = wb.create_sheet(title="Distribución por Ubicación")
+    ws3.append(['Ubicación', 'Cantidad'])
+    for row in ws3.iter_rows(min_row=1, max_row=1, min_col=1, max_col=2):
+        for cell in row:
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal='center')
+
+    for u in ubicacion_data:
+        ws3.append([
+            u['location'] or "Sin ubicación",
+            u['total']
+        ])
+
+    wb.save(response)
+    return response
+
+def loan_report_excel(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    loans = Loan.objects.all()
+    if start_date and end_date:
+        loans = loans.filter(loan_date__range=[start_date, end_date])
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="loan_report.xlsx"'
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Reporte de Préstamos"
+
+    ws.append(['ID', 'Activo', 'Usuario', 'Fecha de Préstamo', 'Fecha de Vencimiento', 'Fecha de Devolución', 'Estado'])
+    for row in ws.iter_rows(min_row=1, max_row=1, min_col=1, max_col=7):
+        for cell in row:
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal='center')
+
+    for loan in loans:
+        ws.append([
+            loan.id,
+            loan.asset.name,
+            loan.user.username,
+            loan.loan_date.strftime('%d/%m/%Y'),
+            loan.due_date.strftime('%d/%m/%Y'),
+            loan.return_date.strftime('%d/%m/%Y') if loan.return_date else '-',
+            loan.status
+        ])
+
+    wb.save(response)
+    return response
+
+def maintenance_report_excel(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    technician = request.GET.get('technician')
+    status = request.GET.get('status')
+
+    maintenances = Maintenance.objects.all()
+    if start_date and end_date:
+        maintenances = maintenances.filter(scheduled_date__range=[start_date, end_date])
+    if technician:
+        maintenances = maintenances.filter(technician__username=technician)
+    if status:
+        maintenances = maintenances.filter(status=status)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="maintenance_report.xlsx"'
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Reporte de Mantenimiento"
+
+    ws.append(['ID', 'Activo', 'Técnico', 'Fecha Programada', 'Fecha de Finalización', 'Estado'])
+    for row in ws.iter_rows(min_row=1, max_row=1, min_col=1, max_col=6):
+        for cell in row:
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal='center')
+
+    for m in maintenances:
+        ws.append([
+            m.id,
+            m.asset.name,
+            m.technician.username if m.technician else 'N/A',
+            m.scheduled_date.strftime('%d/%m/%Y') if m.scheduled_date else '-',
+            m.completed_date.strftime('%d/%m/%Y') if m.completed_date else '-',
+            m.get_status_display()
+        ])
+
+    wb.save(response)
+    return response
+
+def events_general_report_excel(request):
+    events = Event.objects.all().order_by('-fecha_inicio')
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="events_general_report.xlsx"'
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Reporte General de Eventos"
+
+    ws.append(['ID', 'Título', 'Responsable', 'Fecha de Inicio', 'Fecha de Fin', 'Tipo', 'Lugar'])
+    for row in ws.iter_rows(min_row=1, max_row=1, min_col=1, max_col=7):
+        for cell in row:
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal='center')
+
+    for event in events:
+        ws.append([
+            event.id,
+            event.titulo,
+            event.responsable.username,
+            event.fecha_inicio.strftime('%d/%m/%Y %H:%M'),
+            event.fecha_fin.strftime('%d/%m/%Y %H:%M'),
+            event.get_tipo_display(),
+            event.lugar
+        ])
+
+    wb.save(response)
+    return response
+
+def events_by_date_excel(request):
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    events = Event.objects.all()
+    if start_date and end_date:
+        events = events.filter(fecha_inicio__range=[start_date, end_date])
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="events_by_date_report.xlsx"'
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Reporte de Eventos por Fecha"
+
+    ws.append(['ID', 'Título', 'Responsable', 'Fecha de Inicio', 'Fecha de Fin', 'Tipo', 'Lugar'])
+    for row in ws.iter_rows(min_row=1, max_row=1, min_col=1, max_col=7):
+        for cell in row:
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal='center')
+
+    for event in events:
+        ws.append([
+            event.id,
+            event.titulo,
+            event.responsable.username,
+            event.fecha_inicio.strftime('%d/%m/%Y %H:%M'),
+            event.fecha_fin.strftime('%d/%m/%Y %H:%M'),
+            event.get_tipo_display(),
+            event.lugar
+        ])
+
+    wb.save(response)
+    return response
+
+def events_by_user_excel(request):
+    events = Event.objects.values('responsable__username').annotate(total=Count('id'))
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename="events_by_user_report.xlsx"'
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Reporte de Eventos por Usuario"
+
+    ws.append(['Usuario', 'Total de Eventos'])
+    for row in ws.iter_rows(min_row=1, max_row=1, min_col=1, max_col=2):
+        for cell in row:
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal='center')
+
+    for item in events:
+        ws.append([
+            item['responsable__username'],
+            item['total']
+        ])
+
+    wb.save(response)
     return response
