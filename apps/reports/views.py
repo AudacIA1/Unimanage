@@ -19,6 +19,10 @@ from openpyxl.styles import Font, Alignment
 
 @group_required('Admin') # Restrict to Admin for now
 def asset_usage_report(request):
+    """
+    Genera un informe de uso de activos, permitiendo filtrar por categoría, ubicación y rango de fechas.
+    Muestra un resumen de activos por estado.
+    """
     form = AssetUsageFilterForm(request.GET or None)
     assets = Asset.objects.all()
 
@@ -27,7 +31,7 @@ def asset_usage_report(request):
         if form.cleaned_data['category']:
             assets = assets.filter(category=form.cleaned_data['category'])
         if form.cleaned_data['location']:
-            assets = assets.filter(location=form.cleaned_data['location'])
+            assets = assets.filter(location__icontains=form.cleaned_data['location'])
         
         # Filter by updated_at for date range
         if form.cleaned_data['start_date']:
@@ -58,6 +62,9 @@ def asset_usage_report(request):
 
 @group_required('Admin') # Restrict to Admin for now
 def asset_by_category_report(request):
+    """
+    Genera un informe de activos agrupados por categoría.
+    """
     data = (Asset.objects
             .values('category__name')
             .annotate(total=Count('id')) # Removed Sum('value')
@@ -70,6 +77,9 @@ def asset_by_category_report(request):
 
 @group_required('Admin') # Restrict to Admin for now
 def asset_by_location_report(request):
+    """
+    Genera un informe de activos agrupados por ubicación.
+    """
     data = (Asset.objects
             .values('location') # Changed to 'location'
             .annotate(total_assets=Count('id')) # Removed Sum('value')
@@ -82,6 +92,9 @@ def asset_by_location_report(request):
 
 @group_required('Admin') # Restrict to Admin for now
 def report_list(request):
+    """
+    Muestra una lista general de reportes disponibles y un resumen de préstamos.
+    """
     # Filtros desde el frontend
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
@@ -107,6 +120,9 @@ def report_list(request):
     return render(request, 'reports/report_list.html', context)
 
 def loan_report_pdf(request):
+    """
+    Genera un informe de préstamos en formato PDF, con opción de filtrar por rango de fechas.
+    """
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
@@ -137,6 +153,10 @@ def loan_report_pdf(request):
 
 @group_required('Admin') # Restrict to Admin for now
 def general_assets_report_pdf(request):
+    """
+    Genera un informe general de activos en formato PDF, incluyendo resumen por estado,
+    distribución por categoría y distribución por ubicación.
+    """
     # Consulta 1: Estado general
     estado_data = Asset.objects.values('status').annotate(total=Count('id'))
 
@@ -241,6 +261,9 @@ def general_assets_report_pdf(request):
     return response
 
 def maintenance_report_view(request):
+    """
+    Muestra un informe de mantenimiento con opciones de filtrado por fecha, técnico y estado.
+    """
     # Filtros
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
@@ -272,6 +295,9 @@ def maintenance_report_view(request):
     return render(request, 'reports/maintenance_report.html', context)
 
 def maintenance_report_pdf(request):
+    """
+    Genera un informe de mantenimiento en formato PDF, con opciones de filtrado.
+    """
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     technician = request.GET.get('technician')
@@ -311,6 +337,9 @@ import io
 from django.http import FileResponse
 
 def events_general_report(request):
+    """
+    Muestra un informe general de eventos.
+    """
     events = Event.objects.all().order_by('-fecha_inicio')
     return render(request, 'reports/events_general.html', {
         'title': 'Reporte General de Eventos',
@@ -318,6 +347,9 @@ def events_general_report(request):
     })
 
 def events_by_date(request):
+    """
+    Muestra un informe de eventos filtrados por rango de fechas.
+    """
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     events = Event.objects.all()
@@ -335,6 +367,9 @@ def events_by_date(request):
 
 
 def events_general_report_pdf(request):
+    """
+    Genera un informe general de eventos en formato PDF.
+    """
     events = Event.objects.all().order_by('-fecha_inicio')
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="events_general_report.pdf"'
@@ -357,6 +392,9 @@ def events_general_report_pdf(request):
     return response
 
 def events_by_date_pdf(request):
+    """
+    Genera un informe de eventos filtrados por rango de fechas en formato PDF.
+    """
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     events = Event.objects.all()
@@ -386,6 +424,10 @@ def events_by_date_pdf(request):
 
 @group_required('Admin')
 def general_assets_report_excel(request):
+    """
+    Genera un informe general de activos en formato Excel, incluyendo resumen por estado,
+    distribución por categoría y distribución por ubicación.
+    """
     # Data queries (same as PDF view)
     estado_data = Asset.objects.values('status').annotate(total=Count('id'))
     categoria_data = (Asset.objects
@@ -454,6 +496,9 @@ def general_assets_report_excel(request):
     return response
 
 def loan_report_excel(request):
+    """
+    Genera un informe de préstamos en formato Excel, con opción de filtrar por rango de fechas.
+    """
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
@@ -489,6 +534,9 @@ def loan_report_excel(request):
     return response
 
 def maintenance_report_excel(request):
+    """
+    Genera un informe de mantenimiento en formato Excel, con opciones de filtrado.
+    """
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     technician = request.GET.get('technician')
@@ -529,6 +577,9 @@ def maintenance_report_excel(request):
     return response
 
 def events_general_report_excel(request):
+    """
+    Genera un informe general de eventos en formato Excel.
+    """
     events = Event.objects.all().order_by('-fecha_inicio')
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -559,6 +610,9 @@ def events_general_report_excel(request):
     return response
 
 def events_by_date_excel(request):
+    """
+    Genera un informe de eventos filtrados por rango de fechas en formato Excel.
+    """
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
     events = Event.objects.all()
@@ -593,6 +647,9 @@ def events_by_date_excel(request):
     return response
 
 def events_by_user_excel(request):
+    """
+    Genera un informe de eventos agrupados por usuario responsable en formato Excel.
+    """
     events = Event.objects.values('responsable__username').annotate(total=Count('id'))
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')

@@ -1,3 +1,8 @@
+"""
+Define las rutas URL para la aplicación de solicitudes de préstamo, incluyendo
+listado, creación, detalle, aprobación, rechazo, eliminación de solicitudes
+y búsqueda de activos.
+"""
 from django.urls import path
 from . import views
 

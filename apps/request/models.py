@@ -3,6 +3,9 @@ from django.contrib.auth.models import User
 from apps.assets.models import Asset
 
 class LoanRequest(models.Model):
+    """
+    Representa una solicitud de préstamo de un activo por parte de un usuario.
+    """
     STATUS_CHOICES = [
         ('pending', 'Pendiente'),
         ('approved', 'Aprobada'),
@@ -20,4 +23,5 @@ class LoanRequest(models.Model):
     response_date = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
+        """Representación en cadena de la solicitud de préstamo."""
         return f"Solicitud de {self.user.username} - {self.asset.name} ({self.status})"

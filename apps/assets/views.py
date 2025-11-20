@@ -13,7 +13,6 @@ from apps.accounts.decorators import groups_required, group_required
 def asset_list(request):
     """
     Muestra una lista de todos los activos, con opciones de filtrado.
-
     Permite filtrar los activos por nombre, categoría, ubicación y estado.
     También calcula y muestra métricas generales sobre los activos filtrados.
     """
@@ -63,10 +62,8 @@ def asset_list(request):
 @groups_required(['Admin', 'Staff'])
 def asset_create(request):
     """
-    Crea un nuevo activo.
-
-    Muestra un formulario para crear un nuevo activo y procesa la
-    información enviada.
+    Vista para crear un nuevo activo.
+    Muestra un formulario para crear un nuevo activo y procesa la información enviada.
     """
     if request.method == "POST":
         form = AssetForm(request.POST)
@@ -80,10 +77,8 @@ def asset_create(request):
 @groups_required(['Admin', 'Staff', 'Tech'])
 def asset_edit(request, pk):
     """
-    Edita un activo existente.
-
-    Muestra un formulario pre-rellenado para editar un activo
-    identificado por su clave primaria (pk).
+    Vista para editar un activo existente.
+    Muestra un formulario pre-rellenado para editar un activo identificado por su clave primaria (pk).
     """
     asset = get_object_or_404(Asset, pk=pk)
     if request.method == "POST":
@@ -98,10 +93,8 @@ def asset_edit(request, pk):
 @group_required('Admin')
 def asset_delete(request, pk):
     """
-    Elimina un activo existente.
-
-    Pide confirmación antes de eliminar un activo identificado por su
-    clave primaria (pk).
+    Vista para eliminar un activo existente.
+    Pide confirmación antes de eliminar un activo identificado por su clave primaria (pk).
     """
     asset = get_object_or_404(Asset, pk=pk)
     if request.method == "POST":
@@ -110,6 +103,10 @@ def asset_delete(request, pk):
     return render(request, "assets/asset_confirm_delete.html", {"asset": asset})
 
 def asset_category_create_popup(request):
+    """
+    Vista para crear una nueva categoría de activo a través de un popup (AJAX).
+    Devuelve la nueva categoría creada o errores de validación en formato JSON.
+    """
     if request.method == "POST":
         form = AssetCategoryForm(request.POST)
         if form.is_valid():

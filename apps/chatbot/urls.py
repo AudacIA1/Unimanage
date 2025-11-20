@@ -1,3 +1,7 @@
+"""
+Define las rutas URL para la API del chatbot, incluyendo el endpoint principal
+para la interacción y un endpoint para reiniciar la sesión del chatbot.
+"""
 from django.urls import path
 from . import views
 

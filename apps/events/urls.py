@@ -1,3 +1,7 @@
+"""
+Define las rutas URL para la aplicación de eventos, incluyendo la vista de calendario,
+endpoints de API para eventos, y operaciones CRUD para eventos y entidades asistentes.
+"""
 from django.urls import path
 from . import views
 

@@ -1,3 +1,7 @@
+"""
+Define las rutas URL para la aplicación de gestión de mantenimiento, incluyendo
+listado, creación, edición y eliminación de tareas de mantenimiento.
+"""
 from django.urls import path
 from . import views
 

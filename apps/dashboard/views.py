@@ -16,6 +16,14 @@ from django.http import HttpResponse
 
 @login_required
 def dashboard_view(request):
+    """
+    Vista principal del dashboard que muestra información relevante según el rol del usuario.
+
+    - Administradores y Staff ven un dashboard completo con métricas de activos, préstamos,
+      mantenimientos, eventos y solicitudes.
+    - Técnicos ven un dashboard simplificado con sus mantenimientos asignados.
+    - Usuarios regulares ven sus préstamos y solicitudes.
+    """
     user = request.user
     
     # Determine user role from groups
@@ -173,6 +181,10 @@ def dashboard_view(request):
 
 @login_required
 def export_report(request):
+    """
+    Exporta un informe de préstamos vencidos en formato CSV.
+    Accesible solo para usuarios con rol de Administrador o Staff.
+    """
     user = request.user
     is_admin = user.groups.filter(name='Admin').exists()
     is_staff = user.groups.filter(name='Staff').exists()

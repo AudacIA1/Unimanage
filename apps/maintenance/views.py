@@ -8,10 +8,8 @@ from apps.accounts.decorators import groups_required
 @login_required
 def maintenance_list(request):
     """
-    Muestra una lista de todas las tareas de mantenimiento, con opciones de filtrado.
-
-    Permite filtrar las tareas por su estado ('Pendiente', 'En proceso', 'Finalizado').
-    También calcula y muestra métricas generales sobre las tareas.
+    Muestra una lista de todas las tareas de mantenimiento, con opciones de filtrado por estado.
+    Calcula y muestra métricas generales sobre las tareas.
     """
     all_maintenances = Maintenance.objects.select_related("asset").all()
 
@@ -42,7 +40,7 @@ def maintenance_list(request):
 @groups_required(['Admin', 'Tech'])
 def maintenance_create(request):
     """
-    Crea una nueva tarea de mantenimiento y actualiza el estado del activo a 'mantenimiento'.
+    Crea una nueva tarea de mantenimiento y actualiza el estado del activo asociado a 'mantenimiento'.
     """
     if request.method == "POST":
         form = MaintenanceForm(request.POST)
@@ -63,7 +61,8 @@ def maintenance_create(request):
 @groups_required(['Admin', 'Tech'])
 def maintenance_edit(request, pk):
     """
-    Edita una tarea de mantenimiento existente y actualiza el estado del activo si es necesario.
+    Edita una tarea de mantenimiento existente. Si el estado cambia a 'Finalizado',
+    el activo asociado vuelve a estar 'disponible'.
     """
     maintenance = get_object_or_404(Maintenance, pk=pk)
     original_status = maintenance.status
@@ -88,7 +87,8 @@ def maintenance_edit(request, pk):
 @groups_required(['Admin', 'Tech'])
 def maintenance_delete(request, pk):
     """
-    Elimina una tarea de mantenimiento existente y actualiza el estado del activo si es necesario.
+    Elimina una tarea de mantenimiento existente. El activo asociado
+    vuelve a estar 'disponible'.
     """
     maintenance = get_object_or_404(Maintenance, pk=pk)
     if request.method == "POST":

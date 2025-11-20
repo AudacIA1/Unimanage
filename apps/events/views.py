@@ -5,6 +5,9 @@ from .forms import EventoForm, ChecklistItemFormSet, AttendingEntityForm
 from apps.accounts.decorators import groups_required
 
 def calendar_view(request):
+    """
+    Muestra una vista de calendario con todos los eventos.
+    """
     events_for_table = Evento.objects.all().select_related('responsable', 'attending_entity')
     context = {
         'events_for_table': events_for_table,
@@ -12,6 +15,10 @@ def calendar_view(request):
     return render(request, 'events/calendar.html', context)
 
 def eventos_api(request):
+    """
+    Endpoint de API que devuelve eventos en formato JSON para uso en calendarios u otras interfaces.
+    Excluye eventos de tipo 'prestamo'.
+    """
     eventos = Evento.objects.exclude(tipo='prestamo')
     data = []
     for e in eventos:
@@ -27,6 +34,9 @@ def eventos_api(request):
 
 @groups_required(['Admin', 'Staff', 'Tech'])
 def evento_create(request):
+    """
+    Vista para crear un nuevo evento, incluyendo los elementos de checklist asociados.
+    """
     if request.method == 'POST':
         form = EventoForm(request.POST)
         if form.is_valid():
@@ -54,6 +64,9 @@ from django.contrib import messages
 
 @groups_required(['Admin', 'Staff', 'Tech'])
 def evento_update(request, pk):
+    """
+    Vista para actualizar un evento existente, incluyendo sus elementos de checklist.
+    """
     evento = get_object_or_404(Evento, pk=pk)
     if request.method == 'POST':
         form = EventoForm(request.POST, instance=evento)
@@ -72,8 +85,10 @@ def evento_update(request, pk):
     return render(request, 'events/event_form.html', {'form': form, 'formset': formset, 'evento': evento})
 
 @groups_required(['Administrador'])
-
 def evento_delete(request, pk):
+    """
+    Vista para eliminar un evento existente.
+    """
     evento = get_object_or_404(Evento, pk=pk)
     evento.delete()
     messages.success(request, f"El evento '{evento.titulo}' ha sido eliminado.")
@@ -82,11 +97,17 @@ def evento_delete(request, pk):
 
 @groups_required(['Admin', 'Staff'])
 def attending_entity_list(request):
+    """
+    Muestra una lista de todas las entidades asistentes.
+    """
     entities = AttendingEntity.objects.all()
     return render(request, 'events/attending_entity_list.html', {'entities': entities})
 
 @groups_required(['Admin', 'Staff'])
 def attending_entity_create(request):
+    """
+    Vista para crear una nueva entidad asistente.
+    """
     if request.method == 'POST':
         form = AttendingEntityForm(request.POST)
         if form.is_valid():
@@ -98,6 +119,9 @@ def attending_entity_create(request):
 
 @groups_required(['Admin', 'Staff'])
 def attending_entity_update(request, pk):
+    """
+    Vista para actualizar una entidad asistente existente.
+    """
     entity = get_object_or_404(AttendingEntity, pk=pk)
     if request.method == 'POST':
         form = AttendingEntityForm(request.POST, instance=entity)
@@ -110,6 +134,9 @@ def attending_entity_update(request, pk):
 
 @groups_required(['Admin'])
 def attending_entity_delete(request, pk):
+    """
+    Vista para eliminar una entidad asistente existente.
+    """
     entity = get_object_or_404(AttendingEntity, pk=pk)
     if request.method == 'POST':
         entity.delete()

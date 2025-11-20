@@ -1,3 +1,7 @@
+"""
+Define las rutas URL para la aplicación de gestión de préstamos, incluyendo
+listado, creación, edición, eliminación y devolución de préstamos.
+"""
 from django.urls import path
 from . import views
 

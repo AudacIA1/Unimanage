@@ -1,3 +1,7 @@
+"""
+Define las rutas URL para la aplicación del dashboard, incluyendo la vista principal
+del dashboard y la funcionalidad de exportación de reportes.
+"""
 from django.urls import path
 from . import views
 

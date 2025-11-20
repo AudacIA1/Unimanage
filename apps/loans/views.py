@@ -8,10 +8,8 @@ from apps.accounts.decorators import groups_required
 @login_required
 def loan_list(request):
     """
-    Muestra una lista de todos los préstamos, con opciones de filtrado.
-
-    Permite filtrar los préstamos por su estado ('Activo' o 'Devuelto').
-    También calcula y muestra métricas generales sobre los préstamos.
+    Muestra una lista de todos los préstamos, con opciones de filtrado por estado.
+    Calcula y muestra métricas generales sobre los préstamos.
     """
     all_loans = Loan.objects.select_related("asset", "user").all()
 
@@ -48,7 +46,7 @@ def loan_list(request):
 @groups_required(['Admin', 'Staff'])
 def loan_create(request):
     """
-    Crea un nuevo préstamo y actualiza el estado del activo a 'en_uso'.
+    Crea un nuevo préstamo y actualiza el estado del activo asociado a 'en_uso'.
     """
     if request.method == "POST":
         form = LoanForm(request.POST)
@@ -70,7 +68,8 @@ def loan_create(request):
 @groups_required(['Admin', 'Staff'])
 def loan_edit(request, pk):
     """
-    Edita un préstamo existente y actualiza el estado de los activos si es necesario.
+    Edita un préstamo existente y gestiona la actualización del estado de los activos
+    si el activo prestado cambia.
     """
     loan = get_object_or_404(Loan, pk=pk)
     original_asset = loan.asset
@@ -98,7 +97,8 @@ def loan_edit(request, pk):
 @groups_required(['Admin', 'Staff'])
 def loan_return(request, pk):
     """
-    Marca un préstamo como devuelto y actualiza el estado del activo a 'disponible'.
+    Marca un préstamo como devuelto, establece la fecha de devolución
+    y actualiza el estado del activo asociado a 'disponible'.
     """
     loan = get_object_or_404(Loan, pk=pk)
     loan.status = 'Devuelto'
@@ -115,7 +115,8 @@ def loan_return(request, pk):
 @groups_required(['Admin', 'Staff'])
 def loan_delete(request, pk):
     """
-    Elimina un préstamo existente y actualiza el estado del activo si es necesario.
+    Elimina un préstamo existente. Si el préstamo estaba activo,
+    el activo asociado vuelve a estar 'disponible'.
     """
     loan = get_object_or_404(Loan, pk=pk)
     if request.method == "POST":

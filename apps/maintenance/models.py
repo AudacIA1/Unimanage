@@ -5,10 +5,7 @@ from django.contrib.auth.models import User
 
 class Maintenance(models.Model):
     """
-    Representa una tarea de mantenimiento para un activo.
-
-    Registra el activo que requiere mantenimiento, una descripción del
-    trabajo, quién lo realiza, el estado de la tarea y cuándo se creó.
+    Representa una tarea de mantenimiento programada o realizada para un activo.
     """
     STATUS_CHOICES = [
         ('pending', 'Pendiente'),

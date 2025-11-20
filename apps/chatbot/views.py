@@ -20,16 +20,11 @@ except OSError as e:
 
 def chatbot_api(request):
     """
-    API para el chatbot que procesa los mensajes de los usuarios.
+    API principal para el chatbot que procesa los mensajes de los usuarios.
 
-    Esta vista recibe un mensaje del usuario, utiliza modelos de NLP para
-    determinar la intención y las entidades, y gestiona un estado de
-    conversación simple para interacciones de varios pasos.
-
-    La lógica se divide en:
-    1.  Conversación multi-paso (para tareas como reportar un mantenimiento).
-    2.  Conversación de un solo paso (para preguntas directas).
-    3.  Fallback si no se entiende la intención.
+    Utiliza modelos de NLP (spaCy) para detectar la intención y extraer entidades
+    del mensaje del usuario. Gestiona flujos de conversación multi-paso (ej. reportar mantenimiento)
+    y respuestas directas para consultas de un solo paso.
     """
     if not nlp_intent or not nlp_ner:
         return JsonResponse({'response': 'Error interno: Los modelos de lenguaje no están disponibles.'}, status=500)
@@ -181,9 +176,8 @@ def chatbot_api(request):
 @require_POST
 def reset_chatbot_session(request):
     """
-    Vista para limpiar el estado de la conversación del chatbot de la sesión del usuario.
-    Se llama mediante navigator.sendBeacon() desde el frontend antes de que el usuario
-    navegue a otra página.
+    Limpia el estado de la conversación del chatbot de la sesión del usuario.
+    Útil para reiniciar el flujo de conversación.
     """
     try:
         request.session.pop('conversation_state', None)

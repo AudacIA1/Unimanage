@@ -1,3 +1,7 @@
+"""
+Define las rutas URL para la aplicación de gestión de usuarios, incluyendo
+operaciones CRUD para usuarios y un endpoint de API para preferencias del dashboard.
+"""
 # usermanagement/urls.py
 from django.urls import path
 from .views import UserListView, UserCreateView, UserUpdateView, UserDeleteView

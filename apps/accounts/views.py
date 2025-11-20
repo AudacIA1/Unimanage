@@ -3,6 +3,10 @@ from django.contrib import messages
 from .forms import UserRegisterForm
 
 def register(request):
+    """
+    Vista para el registro de nuevos usuarios.
+    Maneja la creación de cuentas de usuario y redirige al login tras un registro exitoso.
+    """
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
@@ -15,4 +19,7 @@ def register(request):
     return render(request, 'accounts/register.html', {'form': form})
 
 def no_permission_view(request):
+    """
+    Vista que se muestra cuando un usuario intenta acceder a una página sin los permisos adecuados.
+    """
     return render(request, 'accounts/no_permission.html')

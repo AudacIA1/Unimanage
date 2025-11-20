@@ -1,3 +1,7 @@
+"""
+Define las rutas URL para la aplicación de cuentas, incluyendo registro, inicio de sesión,
+cierre de sesión y una vista para manejar la falta de permisos.
+"""
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views

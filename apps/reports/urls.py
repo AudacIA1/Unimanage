@@ -1,3 +1,8 @@
+"""
+Define las rutas URL para la aplicación de reportes, incluyendo diversas vistas
+para generar informes de activos, préstamos, mantenimientos y eventos en
+formatos HTML, PDF y Excel.
+"""
 from django.urls import path
 from . import views
 

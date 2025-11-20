@@ -1,3 +1,7 @@
+"""
+Define las rutas URL para la aplicación de gestión de activos, incluyendo
+listado, creación, edición, eliminación de activos y autocompletado de categorías.
+"""
 from django.urls import path
 from . import views
 from . import autocomplete_views # Import the new autocomplete_views
