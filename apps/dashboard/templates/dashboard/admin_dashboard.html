@@ -132,7 +132,7 @@
             <div class="mb-6 flex flex-wrap items-center gap-3">
               <div class="flex items-center gap-2">
                 <button id="saveDashboardBtn" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition">Guardar</button>
-                <button id="resetDashboardBtn" class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition">Reiniciar</button>
+                <button id="resetDashboardBtn" class="px-3 py-1 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition dark:bg-slate-600 dark:text-gray-200 dark:hover:bg-slate-500">Reiniciar</button>
               </div>
 
               <div class="ml-auto flex items-center gap-4">
@@ -170,37 +170,37 @@
             <!-- Contenedor reordenable de charts -->
             <div id="chartsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="chartStatus" id="chartStatus">
-                <h3 class="font-semibold mb-4">Distribución de Activos por Estado</h3>
+                <h3 class="font-semibold mb-4 dark:text-white">Distribución de Activos por Estado</h3>
                 <canvas id="assetStatusChart"></canvas>
               </div>
 
               <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="chartCategory" id="chartCategory">
-                <h3 class="font-semibold mb-4">Activos por Categoría</h3>
+                <h3 class="font-semibold mb-4 dark:text-white">Activos por Categoría</h3>
                 <canvas id="assetCategoryChart"></canvas>
               </div>
 
               <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="chartEntity" id="chartEntity">
-                <h3 class="font-semibold mb-4">Eventos por Entidad</h3>
+                <h3 class="font-semibold mb-4 dark:text-white">Eventos por Entidad</h3>
                 <canvas id="entityChart"></canvas>
               </div>
 
               <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="chartType" id="chartType">
-                <h3 class="font-semibold mb-4">Distribución por Tipo de Evento</h3>
+                <h3 class="font-semibold mb-4 dark:text-white">Distribución por Tipo de Evento</h3>
                 <canvas id="typeChart"></canvas>
               </div>
 
               <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="loanStatusChart" id="loanStatusChart">
-                <h3 class="font-semibold mb-4">Estado de Préstamos</h3>
+                <h3 class="font-semibold mb-4 dark:text-white">Estado de Préstamos</h3>
                 <canvas id="loanStatusCanvas"></canvas>
               </div>
 
               <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="loanUserChart" id="loanUserChart">
-                <h3 class="font-semibold mb-4">Préstamos por Usuario</h3>
+                <h3 class="font-semibold mb-4 dark:text-white">Préstamos por Usuario</h3>
                 <canvas id="loanUserCanvas"></canvas>
               </div>
 
               <div class="chart-card p-6 rounded-2xl shadow-lg border transition-all duration-300 ease-in-out transform" data-id="eventsPerMonthChart" id="eventsPerMonthChart">
-                <h3 class="font-semibold mb-4">Eventos por Mes</h3>
+                <h3 class="font-semibold mb-4 dark:text-white">Eventos por Mes</h3>
                 <canvas id="eventsPerMonthCanvas"></canvas>
               </div>
             </div>
@@ -209,74 +209,78 @@
         <div x-show="tab==='eventos'" class="space-y-8">
             <!-- Checklist and Upcoming Events -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="bg-gradient-to-r from-green-100 to-green-50 dark:from-green-800/30 dark:to-slate-800 p-5 rounded-2xl shadow-md border border-green-200 dark:border-green-700">
-                    <div class="flex items-center mb-3">
-                        <i class="fa-solid fa-calendar-day text-green-600 text-2xl mr-2"></i>
-                        <h2 class="text-2xl font-bold text-green-800 dark:text-green-400">Próximo Evento</h2>
+                <div class="rounded-2xl overflow-hidden shadow-md bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all">
+                    <div class="p-5">
+                        <div class="flex items-center mb-3">
+                            <i class="fa-solid fa-calendar-day text-green-600 text-2xl mr-2"></i>
+                            <h2 class="text-2xl font-bold text-green-800 dark:text-green-400">Próximo Evento</h2>
+                        </div>
+                        {% if nearest_event %}
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ nearest_event.titulo }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"><i class="fa-regular fa-clock mr-1"></i>{{ nearest_event.fecha_inicio|date:"d/m/Y H:i" }}</p>
+                        <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Lugar:</strong> {{ nearest_event.lugar }}</p>
+                        <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Responsable:</strong> {{ nearest_event.responsable }}</p>
+                        <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Entidad que asiste:</strong> {{ nearest_event.attending_entity|default:"-" }}</p>
+                        <h4 class="text-lg font-semibold text-gray-700 dark:text-white mt-4 mb-2">Checklist</h4>
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ checklist_formset.management_form }}
+                            <div id="checklist-formset-container" class="space-y-4">
+                                {% for form in checklist_formset %}
+                                <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                                    <div class="flex items-center space-x-4">
+                                        {{ form.is_checked }}
+                                        {{ form.description }}
+                                    </div>
+                                    {% if checklist_formset.can_delete %}
+                                    <div class="flex items-center">
+                                        {{ form.DELETE }}
+                                        <label for="{{ form.DELETE.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Eliminar</label>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="flex justify-end space-x-4 mt-6">
+                                <button type="button" id="add-checklist-item" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"><i class="fas fa-plus mr-2"></i>Añadir item</button>
+                                <button type="submit" name="checklist_submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Guardar Checklist</button>
+                            </div>
+                            <template id="checklist-empty-form">
+                                <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                                    <div class="flex items-center space-x-4">
+                                        {{ checklist_formset.empty_form.is_checked }}
+                                        {{ checklist_formset.empty_form.description }}
+                                    </div>
+                                    {% if checklist_formset.can_delete %}
+                                    <div class="flex items-center">
+                                        {{ checklist_formset.empty_form.DELETE }}
+                                        <label for="{{ checklist_formset.empty_form.DELETE.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Eliminar</label>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </template>
+                        </form>
+                        {% else %}
+                        <p class="text-sm text-gray-500 dark:text-gray-400">No hay eventos próximos.</p>
+                        {% endif %}
                     </div>
-                    {% if nearest_event %}
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ nearest_event.titulo }}</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4"><i class="fa-regular fa-clock mr-1"></i>{{ nearest_event.fecha_inicio|date:"d/m/Y H:i" }}</p>
-                    <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Lugar:</strong> {{ nearest_event.lugar }}</p>
-                    <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Responsable:</strong> {{ nearest_event.responsable }}</p>
-                    <p class="text-sm text-gray-700 dark:text-gray-300"><strong>Entidad que asiste:</strong> {{ nearest_event.attending_entity|default:"-" }}</p>
-                    <h4 class="text-lg font-semibold text-gray-700 dark:text-white mt-4 mb-2">Checklist</h4>
-                    <form method="post">
-                        {% csrf_token %}
-                        {{ checklist_formset.management_form }}
-                        <div id="checklist-formset-container" class="space-y-4">
-                            {% for form in checklist_formset %}
-                            <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                                <div class="flex items-center space-x-4">
-                                    {{ form.is_checked }}
-                                    {{ form.description }}
-                                </div>
-                                {% if checklist_formset.can_delete %}
-                                <div class="flex items-center">
-                                    {{ form.DELETE }}
-                                    <label for="{{ form.DELETE.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Eliminar</label>
-                                </div>
-                                {% endif %}
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <div class="flex justify-end space-x-4 mt-6">
-                            <button type="button" id="add-checklist-item" class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"><i class="fas fa-plus mr-2"></i>Añadir item</button>
-                            <button type="submit" name="checklist_submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Guardar Checklist</button>
-                        </div>
-                        <template id="checklist-empty-form">
-                            <div class="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                                <div class="flex items-center space-x-4">
-                                    {{ checklist_formset.empty_form.is_checked }}
-                                    {{ checklist_formset.empty_form.description }}
-                                </div>
-                                {% if checklist_formset.can_delete %}
-                                <div class="flex items-center">
-                                    {{ checklist_formset.empty_form.DELETE }}
-                                    <label for="{{ checklist_formset.empty_form.DELETE.id_for_label }}" class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">Eliminar</label>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </template>
-                    </form>
-                    {% else %}
-                    <p class="text-sm text-gray-500">No hay eventos próximos.</p>
-                    {% endif %}
                 </div>
-                <div class="bg-gradient-to-r from-green-100 to-green-50 dark:from-green-800/30 dark:to-slate-800 p-5 rounded-2xl shadow-md border border-green-200 dark:border-green-700">
-                                            <h2 class="text-2xl font-bold text-green-800 dark:text-green-400">Próximos 5 Eventos</h2>
-                    {% if other_upcoming_events %}
-                    <ul class="space-y-4">
-                        {% for event in other_upcoming_events %}
-                        <li class="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0">
-                            <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">{{ event.titulo }}</h3>
-<p class="text-sm text-gray-500 dark:text-gray-400">{{ event.fecha_inicio|date:"d/m/Y H:i" }}</p>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                    {% else %}
-                    <p class="text-sm text-gray-500">No hay más eventos próximos.</p>
-                    {% endif %}
+                <div class="rounded-2xl overflow-hidden shadow-md bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all">
+                                            <div class="p-5">
+                                                <h2 class="text-2xl font-bold text-green-800 dark:text-green-400">Próximos 5 Eventos</h2>
+                        {% if other_upcoming_events %}
+                        <ul class="space-y-4">
+                            {% for event in other_upcoming_events %}
+                            <li class="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-b-0">
+                                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200">{{ event.titulo }}</h3>
+    <p class="text-sm text-gray-500 dark:text-gray-400">{{ event.fecha_inicio|date:"d/m/Y H:i" }}</p>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p class="text-sm text-gray-500 dark:text-gray-400">No hay más eventos próximos.</p>
+                        {% endif %}
+                    </div>
                 </div>
                                               <!-- Attending Entity Stats -->
                                               <div class="rounded-2xl overflow-hidden shadow-md bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-700 hover:shadow-lg transition-all">
@@ -299,33 +303,35 @@
 <div x-show="tab==='historial'" class="space-y-10">
 
     <!-- 🔹 Solicitudes Recientes -->
-    <div class="bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/40 dark:to-slate-900 p-6 rounded-2xl shadow-md border border-green-300 dark:border-green-700 hover:shadow-lg transition-all">
-        <div class="flex items-center justify-between mb-3">
-            <h2 class="text-xl font-semibold text-green-700 dark:text-green-400 flex items-center">
-                <i class="fas fa-clipboard-list mr-2"></i> Solicitudes recientes
-            </h2>
-            <a href="{% url 'request:request_list' %}">
-                <button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg shadow transition-all">
-                    Ver todas
-                </button>
-            </a>
-        </div>
+    <div class="rounded-2xl overflow-hidden shadow-md bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-xl font-semibold text-green-700 dark:text-green-400 flex items-center">
+                    <i class="fas fa-clipboard-list mr-2"></i> Solicitudes recientes
+                </h2>
+                <a href="{% url 'request:request_list' %}">
+                    <button class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg shadow transition-all">
+                        Ver todas
+                    </button>
+                </a>
+            </div>
 
-        <ul class="space-y-1 text-sm dark:text-gray-200">
-            {% for r in recent_requests %}
-            <li class="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800 rounded-lg hover:bg-green-50 dark:hover:bg-slate-700 transition-all">
-                <span>
-                    <strong>{{ r.user.username }}</strong> pidió 
-                    <span class="font-semibold">{{ r.asset.name }}</span>
-                </span>
-                <span class="status {{ r.get_status_display|status_to_class }} font-semibold">
-                    {{ r.get_status_display }}
-                </span>
-            </li>
-            {% empty %}
-            <p class="text-sm text-gray-500">No hay solicitudes recientes</p>
-            {% endfor %}
-        </ul>
+            <ul class="space-y-1 text-sm dark:text-gray-200">
+                {% for r in recent_requests %}
+                <li class="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800 rounded-lg hover:bg-green-50 dark:hover:bg-slate-700 transition-all">
+                    <span>
+                        <strong>{{ r.user.username }}</strong> pidió 
+                        <span class="font-semibold">{{ r.asset.name }}</span>
+                    </span>
+                    <span class="status {{ r.get_status_display|status_to_class }} font-semibold">
+                        {{ r.get_status_display }}
+                    </span>
+                </li>
+                {% empty %}
+                <p class="text-sm text-gray-500 dark:text-gray-400">No hay solicitudes recientes</p>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 
     <!--  Últimos Préstamos y Mantenimientos -->
@@ -399,6 +405,17 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('add-checklist-item').addEventListener('click', function() {
+        const formsetContainer = document.getElementById('checklist-formset-container');
+        const totalForms = document.getElementById('id_{{ checklist_formset.prefix }}-TOTAL_FORMS');
+        const emptyFormTemplate = document.getElementById('checklist-empty-form').innerHTML;
+        const newIndex = parseInt(totalForms.value);
+
+        const newForm = emptyFormTemplate.replace(/__prefix__/g, newIndex);
+        formsetContainer.insertAdjacentHTML('beforeend', newForm);
+        totalForms.value = newIndex + 1;
+    });
+
     let assetStatusChartInstance;
     let assetCategoryChartInstance;
     let entityChartInstance;

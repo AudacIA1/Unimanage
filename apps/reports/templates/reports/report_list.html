@@ -10,10 +10,10 @@
     </header>
 <div x-data="{ tab: 'prestamos' }" class="space-y-6 container mx-auto px-4 mb-16">
          <div class="flex space-x-4 border-b pb-2">
-            <button @click="tab='activos'" :class="tab==='activos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Activos</button>
-            <button @click="tab='prestamos'" :class="tab==='prestamos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Prestamos</button>
-            <button @click="tab='mantenimientos'" :class="tab==='mantenimientos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Mantenimientos</button>
-            <button @click="tab='eventos'" :class="tab==='eventos' ? 'text-green-600 font-semibold' : 'text-gray-500'">Eventos</button>
+            <button @click="tab='activos'" :class="tab==='activos' ? 'text-green-600 font-semibold' : 'text-gray-500 dark:text-gray-300'">Activos</button>
+            <button @click="tab='prestamos'" :class="tab==='prestamos' ? 'text-green-600 font-semibold' : 'text-gray-500 dark:text-gray-300'">Prestamos</button>
+            <button @click="tab='mantenimientos'" :class="tab==='mantenimientos' ? 'text-green-600 font-semibold' : 'text-gray-500 dark:text-gray-300'">Mantenimientos</button>
+            <button @click="tab='eventos'" :class="tab==='eventos' ? 'text-green-600 font-semibold' : 'text-gray-500 dark:text-gray-300'">Eventos</button>
         </div>
 <div :class="{ 'hidden': tab !== 'activos' }" class="space-y-8">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -55,7 +55,7 @@
 </div>
 <div :class="{ 'hidden': tab !== 'prestamos' }" class="space-y-8">
     <div class="p-6">
-      <h2 class="text-2xl font-bold mb-4">Reporte de Préstamos</h2>
+      <h2 class="text-2xl font-bold mb-4 dark:text-white">Reporte de Préstamos</h2>
 
       <form method="GET" class="mb-4 flex space-x-4">
         <input type="date" name="start_date" value="{% if start_date %}{{ start_date }}{% endif %}" class="border p-2 rounded">

@@ -4,13 +4,13 @@
 {% block content %}
 
 <div class="container mx-auto px-4 py-6">
-  <h1 class="text-xl font-bold mb-4">Eliminar Préstamo</h1>
-  <p>¿Estás seguro de que deseas eliminar el préstamo de <strong>{{ prestamo.asset.name }}</strong>?</p>
+  <h1 class="text-xl font-bold mb-4 dark:text-white">Eliminar Préstamo</h1>
+  <p class="dark:text-gray-300">¿Estás seguro de que deseas eliminar el préstamo de <strong>{{ prestamo.asset.name }}</strong>?</p>
 
   <form method="post" class="mt-4">
     {% csrf_token %}
     <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded">Sí, eliminar</button>
-    <a href="{% url 'loan_list' %}" class="ml-2 text-gray-600">Cancelar</a>
+    <a href="{% url 'loan_list' %}" class="ml-2 text-gray-600 dark:text-gray-300">Cancelar</a>
   </form>
 </div>
 {% endblock %}
