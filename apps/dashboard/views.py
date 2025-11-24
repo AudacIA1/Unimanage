@@ -27,12 +27,12 @@ def dashboard_view(request):
     user = request.user
     
     # Determine user role from groups
-    is_admin = user.groups.filter(name='Admin').exists()
-    is_staff = user.groups.filter(name='Staff').exists()
-    is_tech = user.groups.filter(name='Tech').exists()
+    is_administrador = user.groups.filter(name='administrador').exists()
+    is_administrativo = user.groups.filter(name='administrativo').exists()
+    is_tecnico = user.groups.filter(name='tecnico').exists()
 
     # Admin and Staff get the full dashboard
-    if is_admin or is_staff:
+    if user.is_superuser or is_administrador or is_administrativo:
         # --- 1. Métricas Generales de Activos ---
         total_assets = Asset.objects.count()
         available_assets = Asset.objects.filter(status="disponible").count()
@@ -157,7 +157,7 @@ def dashboard_view(request):
         return render(request, "dashboard/admin_dashboard.html", context)
 
     # Techs get a specific, simpler view
-    elif is_tech:
+    elif is_tecnico:
         # Reuse the staff_dashboard template and pass tech-specific data
         full_name = user.get_full_name()
         tech_maintenances = Maintenance.objects.filter(performed_by=full_name).order_by('-created_at') if full_name else Maintenance.objects.none()

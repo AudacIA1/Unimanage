@@ -1,5 +1,6 @@
 {% load static %}
 {% load role_tags %}
+{% is_in_groups user "administrador,administrativo" as is_admin_or_administrativo %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -83,7 +84,9 @@
         <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
+    {% if user.is_superuser or is_admin_or_administrativo %}
+      <link rel="stylesheet" href="{% static 'css/chatbot.css' %}">
+    {% endif %}
     <link rel="stylesheet" href="{% static 'css/datatables-dark.css' %}">
     <style>
         [x-cloak] { display: none !important; }
@@ -138,17 +141,13 @@
         </div>
         <nav class="flex-grow p-4">
             <ul class="space-y-2">
-                {% if user.is_superuser %}
+                {% if user.is_superuser or is_admin_or_administrativo %}
                     {% include "sidebar/sidebar_admin.html" %}
                 {% else %}
-                    {% in_group user "Tech" as is_tech %}
-                    {% in_group user "Staff" as is_staff %}
-                    {% in_group user "User" as is_user %}
+                    {% in_group user "tecnico" as is_tecnico %}
 
-                    {% if is_tech %}
+                    {% if is_tecnico %}
                         {% include "sidebar/sidebar_tech.html" %}
-                    {% elif is_staff %}
-                        {% include "sidebar/sidebar_staff.html" %}
                     {% else %}
                         {% include "sidebar/sidebar_user.html" %}
                     {% endif %}
@@ -211,30 +210,32 @@
     {% block content %}{% endblock %}
   </main>
 
-<!-- Chatbot Container -->
-<div id="chatbot-container">
-    <!-- Chatbot Bubble -->
-    <div id="chatbot-bubble">
-        <i class="fas fa-cog"></i>
-    </div>
+  <!-- Chatbot Container -->
+  {% if user.is_superuser or is_admin_or_administrativo %}
+    <div id="chatbot-container">
+        <!-- Chatbot Bubble -->
+        <div id="chatbot-bubble">
+            <i class="fas fa-cog"></i>
+        </div>
 
-    <!-- Chatbot Window -->
-    <div id="chatbot-window" class="hidden">
-        <div id="chatbot-header">
-            <span>Chatbot UniManage</span>
-            <button id="chatbot-close-btn">&times;</button>
-        </div>
-        <div id="chatbot-messages">
-            <!-- Messages will be appended here -->
-        </div>
-        <div id="chatbot-input-container">
-            <form id="chatbot-form">
-                <input type="text" id="chatbot-input" placeholder="Escribe tu mensaje...">
-                <button type="submit"><i class="fas fa-paper-plane"></i></button>
-            </form>
+        <!-- Chatbot Window -->
+        <div id="chatbot-window" class="hidden">
+            <div id="chatbot-header">
+                <span>Chatbot UniManage</span>
+                <button id="chatbot-close-btn">&times;</button>
+            </div>
+            <div id="chatbot-messages">
+                <!-- Messages will be appended here -->
+            </div>
+            <div id="chatbot-input-container">
+                <form id="chatbot-form">
+                    <input type="text" id="chatbot-input" placeholder="Escribe tu mensaje...">
+                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
         </div>
     </div>
-</div>
+  {% endif %}
 
     {% block extra_scripts %}{% endblock %}
     <!-- Tailwind config + CDN -->
@@ -256,6 +257,8 @@
         }
       }
     </script>
-    <script src="{% static 'js/chatbot.js' %}"></script>
+    {% if user.is_superuser or is_admin_or_administrativo %}
+      <script src="{% static 'js/chatbot.js' %}"></script>
+    {% endif %}
 </body>
 </html>

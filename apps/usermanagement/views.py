@@ -13,14 +13,14 @@ class AdminOrSuperuserRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     """
     def test_func(self):
         """Comprueba si el usuario es superusuario o pertenece al grupo 'Admin'."""
-        return self.request.user.is_superuser or self.request.user.groups.filter(name='Admin').exists()
+        return self.request.user.is_superuser or self.request.user.groups.filter(name='administrador').exists()
 
 class UserOwnerOrAdminMixin(LoginRequiredMixin, UserPassesTestMixin):
     """
     Mixin que permite el acceso si el usuario es el dueño del objeto, un superusuario o un Admin.
     """
     def test_func(self):
-        is_admin_or_superuser = self.request.user.is_superuser or self.request.user.groups.filter(name='Admin').exists()
+        is_admin_or_superuser = self.request.user.is_superuser or self.request.user.groups.filter(name='administrador').exists()
         is_owner = self.request.user.pk == self.get_object().pk
         return is_admin_or_superuser or is_owner
 
@@ -109,18 +109,33 @@ class UserUpdateForm(forms.ModelForm):
         fields = ['username', 'first_name', 'last_name', 'email', 'is_staff', 'is_superuser', 'group']
 
     def __init__(self, *args, **kwargs):
+        request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
+
         if self.instance and self.instance.pk:
             self.fields['group'].initial = self.instance.groups.first()
+
+        # Check if the user is an admin/superuser
+        is_admin_or_superuser = False
+        if request and request.user.is_authenticated:
+            is_admin_or_superuser = request.user.is_superuser or request.user.groups.filter(name='administrador').exists()
+        
+        # If the user is not an admin, remove the fields for role and permissions
+        if not is_admin_or_superuser:
+            self.fields.pop('group', None)
+            self.fields.pop('is_staff', None)
+            self.fields.pop('is_superuser', None)
 
     def save(self, commit=True):
         user = super().save(commit=False)
         if commit:
             user.save()
-            if self.cleaned_data['group']:
-                user.groups.set([self.cleaned_data['group']])
-            else:
-                user.groups.clear()
+            # Only update group if the field was present in the form
+            if 'group' in self.cleaned_data:
+                if self.cleaned_data['group']:
+                    user.groups.set([self.cleaned_data['group']])
+                else:
+                    user.groups.clear()
         return user
 
 class UserUpdateView(UserOwnerOrAdminMixin, UpdateView):
@@ -130,7 +145,12 @@ class UserUpdateView(UserOwnerOrAdminMixin, UpdateView):
     model = User
     form_class = UserUpdateForm
     template_name = 'usermanagement/user_form.html'
-    success_url = reverse_lazy('user_list')
+    # success_url = reverse_lazy('user_list') # Removed static success_url
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -138,18 +158,29 @@ class UserUpdateView(UserOwnerOrAdminMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        # Prevent modification of the main superuser's role
-        user_to_update = self.get_object()
-        if user_to_update.is_superuser and user_to_update.username == 'admin':
-            if form.cleaned_data['group'] and form.cleaned_data['group'].name != 'Admin':
-                messages.error(self.request, 'No se puede modificar el rol del superusuario principal.')
-                return self.form_invalid(form)
-            if not form.cleaned_data['group']:
-                messages.error(self.request, 'No se puede quitar el rol al superusuario principal.')
-                return self.form_invalid(form)
+        # This check is only relevant if the 'group' field is part of the form,
+        # which is only true for admins.
+        if 'group' in form.cleaned_data:
+            user_to_update = self.get_object()
+            # Security check to prevent modification of the main superuser's role
+            if user_to_update.is_superuser and user_to_update.username == 'admin':
+                if form.cleaned_data['group'] and form.cleaned_data['group'].name != 'administrador':
+                    messages.error(self.request, 'No se puede modificar el rol del superusuario principal.')
+                    return self.form_invalid(form)
+                if not form.cleaned_data['group']:
+                    messages.error(self.request, 'No se puede quitar el rol al superusuario principal.')
+                    return self.form_invalid(form)
 
-        messages.success(self.request, f'Usuario {user_to_update.username} actualizado correctamente.')
+        messages.success(self.request, f'Usuario {self.get_object().username} actualizado correctamente.')
         return super().form_valid(form)
+
+    def get_success_url(self):
+        is_admin_or_superuser = self.request.user.is_superuser or self.request.user.groups.filter(name='administrador').exists()
+        
+        if is_admin_or_superuser:
+            return reverse_lazy('user_list')
+        else:
+            return reverse_lazy('dashboard_home')
 
 class UserDeleteView(AdminOrSuperuserRequiredMixin, DeleteView):
     """
